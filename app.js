@@ -825,7 +825,7 @@ function submitCustomCategory(e) {
 }
 
 function switchNav(nav) {
-  ['catalog', 'dashboard-spec', 'dashboard-prod'].forEach(n => {
+  ['catalog', 'dashboard-spec', 'dashboard-prod', 'chat'].forEach(n => {
     const viewEl = document.getElementById(`view-${n}`);
     if (viewEl) viewEl.classList.add('hidden');
     
@@ -859,6 +859,7 @@ function switchNav(nav) {
 
   if (nav === 'dashboard-spec') renderSpecialistDashboard();
   if (nav === 'dashboard-prod') renderProducerDashboard();
+  if (nav === 'chat') renderChatView();
 }
 
 function resetFilters() {
@@ -1374,6 +1375,252 @@ function showToast(msg) {
     toast.classList.add('hidden');
   }, 3500);
 }
+
+// -------------------------------------------------------------
+// CHAT & MESSAGING SYSTEM LOGIC
+// -------------------------------------------------------------
+let activeChatThreadId = 'thread-1';
+
+let chatThreads = [
+  {
+    id: 'thread-1',
+    name: 'КиноКомпания «КиноПродакшен»',
+    subtitle: 'Продюсер Михаил Сергеевич • Проект «Темная глубина»',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+    unread: true,
+    lastMsg: 'Вызывной лист на 12.08 сформирован. Проверь время смены!',
+    time: '12:42',
+    isOnline: true
+  },
+  {
+    id: 'thread-2',
+    name: 'Елена Морозова (Звукорежиссер)',
+    subtitle: 'Клип «Skyline Echoes» • FOH Консоль',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80',
+    unread: true,
+    lastMsg: 'Добрый день! По райдеру нужен пульт Midas M32.',
+    time: '10:15',
+    isOnline: false
+  },
+  {
+    id: 'thread-3',
+    name: 'Дмитрий Чернов (Фокус-пуллер)',
+    subtitle: 'Фильм «Темная глубина» • 1st AC',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80',
+    unread: false,
+    lastMsg: 'Радиофокус Tilta Nucleus-M готов, батарейки заряжены.',
+    time: 'Вчера',
+    isOnline: true
+  }
+];
+
+let chatMessages = {
+  'thread-1': [
+    {
+      id: 'm1',
+      sender: 'them',
+      text: 'Здравствуйте, Александр! Приглашаем вас гафером на съемочный проект «Темная глубина». Смена 12 часов.',
+      time: '11:30'
+    },
+    {
+      id: 'm2',
+      sender: 'me',
+      text: 'Приветствую! Да, даты 12.08 - 15.08 у меня как раз свободны в графике. Какое осветительное оборудование планируется?',
+      time: '11:45'
+    },
+    {
+      id: 'm3',
+      sender: 'them',
+      text: 'Будет прибор ARRI Skypanel S60-C (2шт), Aputure 600d Pro и сет светодиодных трубок Nanlite.',
+      time: '12:10'
+    },
+    {
+      id: 'm4',
+      type: 'booking_card',
+      sender: 'them',
+      title: '🎯 Официальное приглашение на съемку',
+      project: 'Фильм «Темная глубина»',
+      role: 'Гафер (Gaffer)',
+      rate: '50 000 ₽ / смена',
+      dates: '12.08 - 15.08.2026',
+      status: 'accepted',
+      time: '12:35'
+    },
+    {
+      id: 'm5',
+      sender: 'them',
+      text: 'Вызывной лист на 12.08 сформирован. Проверь время смены!',
+      time: '12:42'
+    }
+  ],
+  'thread-2': [
+    {
+      id: 'm201',
+      sender: 'them',
+      text: 'Добрый день! По райдеру нужен пульт Midas M32.',
+      time: '10:15'
+    }
+  ],
+  'thread-3': [
+    {
+      id: 'm301',
+      sender: 'them',
+      text: 'Радиофокус Tilta Nucleus-M готов, батарейки заряжены.',
+      time: 'Вчера'
+    }
+  ]
+};
+
+function renderChatView() {
+  renderChatThreads();
+  renderActiveChatMessages();
+}
+
+function renderChatThreads(query = '') {
+  const container = document.getElementById('chat-threads-container');
+  if (!container) return;
+
+  const filtered = chatThreads.filter(t => 
+    t.name.toLowerCase().includes(query.toLowerCase()) || 
+    t.subtitle.toLowerCase().includes(query.toLowerCase())
+  );
+
+  container.innerHTML = filtered.map(t => {
+    const isActive = t.id === activeChatThreadId;
+    return `
+      <div onclick="selectChatThread('${t.id}')" class="p-3 flex items-center gap-3 cursor-pointer transition-all ${isActive ? 'bg-zinc-850 border-l-4 border-cyan-400' : 'hover:bg-zinc-900/60'}">
+        <div class="relative shrink-0">
+          <img src="${t.avatar}" class="w-10 h-10 rounded-xl object-cover border border-zinc-700">
+          ${t.isOnline ? '<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 absolute -bottom-0.5 -right-0.5 border-2 border-zinc-950"></span>' : ''}
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center justify-between gap-1">
+            <h4 class="font-bold text-xs ${isActive ? 'text-white' : 'text-zinc-200'} truncate">${t.name}</h4>
+            <span class="text-[9px] font-mono text-zinc-500 shrink-0">${t.time}</span>
+          </div>
+          <p class="text-[10px] text-cyan-400 font-medium truncate">${t.subtitle}</p>
+          <p class="text-[11px] text-zinc-400 truncate mt-0.5 flex items-center justify-between">
+            <span class="truncate">${t.lastMsg}</span>
+            ${t.unread ? '<span class="w-2 h-2 rounded-full bg-cyan-400 ml-1 shrink-0"></span>' : ''}
+          </p>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function selectChatThread(threadId) {
+  activeChatThreadId = threadId;
+  const thread = chatThreads.find(t => t.id === threadId);
+  if (thread) thread.unread = false;
+
+  const headerAvatar = document.getElementById('chat-active-avatar');
+  const headerName = document.getElementById('chat-active-name');
+  const headerSub = document.getElementById('chat-active-subtitle');
+  const headerBadge = document.getElementById('chat-online-badge');
+
+  if (headerAvatar) headerAvatar.src = thread.avatar;
+  if (headerName) headerName.textContent = thread.name;
+  if (headerSub) headerSub.textContent = thread.subtitle;
+  if (headerBadge) {
+    if (thread.isOnline) headerBadge.classList.remove('hidden');
+    else headerBadge.classList.add('hidden');
+  }
+
+  renderChatThreads();
+  renderActiveChatMessages();
+}
+
+function renderActiveChatMessages() {
+  const container = document.getElementById('chat-messages-container');
+  if (!container) return;
+
+  const msgs = chatMessages[activeChatThreadId] || [];
+
+  container.innerHTML = msgs.map(m => {
+    if (m.type === 'booking_card') {
+      return `
+        <div class="my-2 p-3.5 bg-gradient-to-r from-zinc-900 to-zinc-950 border border-cyan-500/40 rounded-2xl space-y-2 max-w-md mx-auto shadow-xl">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="font-bold text-cyan-400 flex items-center gap-1">${m.title}</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold border border-emerald-500/30">Подтверждено</span>
+          </div>
+          <div class="text-xs text-white space-y-0.5">
+            <div class="font-bold text-sm text-white">${m.project}</div>
+            <div class="text-zinc-300">${m.role} • <strong class="text-emerald-400 font-mono">${m.rate}</strong></div>
+            <div class="text-[10px] text-zinc-400 font-mono">Даты смены: ${m.dates}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    const isMe = m.sender === 'me';
+    return `
+      <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+        <div class="max-w-[80%] ${isMe ? 'bg-cyan-600/90 text-white rounded-2xl rounded-tr-none' : 'bg-zinc-800/90 text-zinc-200 rounded-2xl rounded-tl-none'} p-3 text-xs space-y-1 shadow-md">
+          <p class="leading-relaxed">${m.text}</p>
+          <div class="text-[9px] font-mono ${isMe ? 'text-cyan-200' : 'text-zinc-400'} text-right">${m.time}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.scrollTop = container.scrollHeight;
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function sendChatMessage(e) {
+  e.preventDefault();
+  const input = document.getElementById('chat-message-input');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (!chatMessages[activeChatThreadId]) {
+    chatMessages[activeChatThreadId] = [];
+  }
+
+  const now = new Date();
+  const timeStr = `${now.getHours()}:${now.getMinutes() < 10 ? '0' : ''}${now.getMinutes()}`;
+
+  chatMessages[activeChatThreadId].push({
+    id: `m-${Date.now()}`,
+    sender: 'me',
+    text: text,
+    time: timeStr
+  });
+
+  const thread = chatThreads.find(t => t.id === activeChatThreadId);
+  if (thread) {
+    thread.lastMsg = text;
+    thread.time = timeStr;
+  }
+
+  input.value = '';
+  renderActiveChatMessages();
+  renderChatThreads();
+}
+
+function filterChatThreads(val) {
+  renderChatThreads(val);
+}
+
+function attachCallSheetDemo() {
+  if (!chatMessages[activeChatThreadId]) chatMessages[activeChatThreadId] = [];
+
+  chatMessages[activeChatThreadId].push({
+    id: `m-${Date.now()}`,
+    sender: 'me',
+    text: '📎 Прикреплен вызывной лист смены (Call_Sheet_Film_12082026.pdf)',
+    time: 'Только что'
+  });
+
+  renderActiveChatMessages();
+  showToast('Вызывной лист успешно прикреплен к диалогу!');
+}
+
 
 
 

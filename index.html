@@ -114,6 +114,9 @@
       <button id="nav-dashboard-prod" onclick="switchNav('dashboard-prod')" class="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white transition-all flex items-center gap-2">
         <i data-lucide="briefcase" class="w-4 h-4 text-amber-400"></i> Кабинет Продюсера
       </button>
+      <button id="nav-chat" onclick="switchNav('chat')" class="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white transition-all flex items-center gap-2 relative">
+        <i data-lucide="message-square" class="w-4 h-4 text-cyan-400"></i> Чат & Сообщения <span id="nav-chat-badge" class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+      </button>
     </nav>
 
     <!-- Header Right Actions -->
@@ -387,6 +390,74 @@
           <div id="producer-bookings-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
         </div>
 
+    <!-- 4. СИСТЕМА СООБЩЕНИЙ И ЧАТА (Чат компаний и соискателей) -->
+    <div id="view-chat" class="hidden space-y-4 min-w-0">
+      <div class="bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden h-[75vh] flex flex-col md:flex-row shadow-2xl">
+        
+        <!-- Chat Threads List Sidebar -->
+        <aside class="w-full md:w-80 bg-zinc-950/80 border-b md:border-b-0 md:border-r border-zinc-800 flex flex-col shrink-0">
+          <div class="p-3.5 border-b border-zinc-800 flex items-center justify-between">
+            <h2 class="font-bold text-xs sm:text-sm text-white flex items-center gap-2">
+              <i data-lucide="message-square" class="w-4 h-4 text-cyan-400"></i> Сообщения и диалоги
+            </h2>
+            <span id="chat-unread-count" class="text-[9px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-bold">2 новых</span>
+          </div>
+
+          <div class="p-2 border-b border-zinc-800">
+            <div class="relative">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-2.5"></i>
+              <input type="text" id="chat-search-input" oninput="filterChatThreads(this.value)" placeholder="Поиск по имени или проекту..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div id="chat-threads-container" class="flex-1 overflow-y-auto divide-y divide-zinc-800/60 scrollbar-none">
+            <!-- Dynamic JS render -->
+          </div>
+        </aside>
+
+        <!-- Active Chat Window -->
+        <section class="flex-1 flex flex-col bg-zinc-900/40 min-w-0">
+          
+          <!-- Chat Header -->
+          <div id="chat-header" class="p-3.5 bg-zinc-950/90 border-b border-zinc-800 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="relative">
+                <img id="chat-active-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover border border-zinc-700">
+                <span id="chat-online-badge" class="w-2.5 h-2.5 rounded-full bg-emerald-500 absolute -bottom-0.5 -right-0.5 border-2 border-zinc-950"></span>
+              </div>
+              <div class="min-w-0">
+                <h3 id="chat-active-name" class="font-bold text-xs sm:text-sm text-white truncate">КиноКомпания «КиноПродакшен»</h3>
+                <p id="chat-active-subtitle" class="text-[10px] text-zinc-400 truncate">Продюсер Михаил Сергеевич • Проект «Темная глубина»</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="showToast('Вызов контактов: +7 (999) 123-45-67')" class="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs flex items-center gap-1">
+                <i data-lucide="phone" class="w-3.5 h-3.5 text-emerald-400"></i> <span class="hidden sm:inline">Контакты</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Chat Messages Area -->
+          <div id="chat-messages-container" class="flex-1 p-3.5 sm:p-4 overflow-y-auto space-y-3 scrollbar-none">
+            <!-- Dynamic JS render -->
+          </div>
+
+          <!-- Chat Input Controls -->
+          <form onsubmit="sendChatMessage(event)" class="p-3 bg-zinc-950 border-t border-zinc-800 flex items-center gap-2 shrink-0">
+            <button type="button" onclick="attachCallSheetDemo()" title="Прикрепить вызывной лист / договор" class="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-cyan-400 transition-all shrink-0">
+              <i data-lucide="paperclip" class="w-4 h-4"></i>
+            </button>
+
+            <input type="text" id="chat-message-input" required placeholder="Напишите сообщение продюсеру или специалисту..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none">
+
+            <button type="submit" class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-emerald-500 text-zinc-950 font-extrabold text-xs rounded-xl shadow-lg flex items-center gap-1.5 touch-bounce shrink-0">
+              <span>Отправить</span> <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            </button>
+          </form>
+
+        </section>
+
       </div>
     </div>
 
@@ -394,17 +465,21 @@
 
   <!-- Mobile Bottom Safe Navigation -->
   <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-zinc-950/95 backdrop-blur-xl border-t border-zinc-800/90 h-14 flex items-center justify-around px-1 w-full">
-    <button id="mobile-nav-catalog" onclick="switchNav('catalog')" class="flex flex-col items-center gap-0.5 text-cyan-400 font-bold text-[10px] w-1/3">
+    <button id="mobile-nav-catalog" onclick="switchNav('catalog')" class="flex flex-col items-center gap-0.5 text-cyan-400 font-bold text-[10px] w-1/4">
       <i data-lucide="users" class="w-4 h-4"></i>
       <span>Каталог</span>
     </button>
-    <button id="mobile-nav-dashboard-spec" onclick="switchNav('dashboard-spec')" class="flex flex-col items-center gap-0.5 text-zinc-400 font-medium text-[10px] w-1/3">
+    <button id="mobile-nav-dashboard-spec" onclick="switchNav('dashboard-spec')" class="flex flex-col items-center gap-0.5 text-zinc-400 font-medium text-[10px] w-1/4">
       <i data-lucide="user" class="w-4 h-4"></i>
       <span>Соискатель</span>
     </button>
-    <button id="mobile-nav-dashboard-prod" onclick="switchNav('dashboard-prod')" class="flex flex-col items-center gap-0.5 text-zinc-400 font-medium text-[10px] w-1/3">
+    <button id="mobile-nav-dashboard-prod" onclick="switchNav('dashboard-prod')" class="flex flex-col items-center gap-0.5 text-zinc-400 font-medium text-[10px] w-1/4">
       <i data-lucide="briefcase" class="w-4 h-4"></i>
       <span>Наниматель</span>
+    </button>
+    <button id="mobile-nav-chat" onclick="switchNav('chat')" class="flex flex-col items-center gap-0.5 text-zinc-400 font-medium text-[10px] w-1/4">
+      <i data-lucide="message-square" class="w-4 h-4"></i>
+      <span>Чат</span>
     </button>
   </nav>
 
@@ -656,6 +731,6 @@
   </div>
 
 
-  <script src="app.js?v=1.5.0"></script>
+  <script src="app.js?v=1.6.0"></script>
 </body>
 </html>
