@@ -446,13 +446,100 @@ function resetFilters() {
   onDepartmentChange();
 }
 
+// Selected Roles Multiselect State
+let selectedProjectRoles = ["Гафер (Gaffer)", "Фокус-пуллер (1st AC)"];
+
 function openCreateProjectModal() {
   document.getElementById('create-project-modal').classList.remove('hidden');
+  renderRolesDropdownTree();
+  updateSelectedRolesTriggerUI();
 }
 
 function closeCreateProjectModal() {
   document.getElementById('create-project-modal').classList.add('hidden');
+  document.getElementById('project-roles-dropdown').classList.add('hidden');
 }
+
+function toggleProjectRolesDropdown() {
+  const dropdown = document.getElementById('project-roles-dropdown');
+  dropdown.classList.toggle('hidden');
+}
+
+function renderRolesDropdownTree(searchQuery = '') {
+  const container = document.getElementById('roles-checkboxes-container');
+  if (!container) return;
+
+  const query = searchQuery.toLowerCase().trim();
+  container.innerHTML = '';
+
+  departmentsData.forEach(dept => {
+    const matchedProfessions = dept.professions.filter(p => p.toLowerCase().includes(query));
+    if (query && matchedProfessions.length === 0) return;
+
+    const deptGroup = document.createElement('div');
+    deptGroup.className = 'space-y-1';
+
+    const deptTitle = document.createElement('div');
+    deptTitle.className = 'font-bold text-zinc-400 uppercase text-[9px] tracking-wider pt-1 border-b border-zinc-800/60 pb-0.5';
+    deptTitle.textContent = dept.name;
+    deptGroup.appendChild(deptTitle);
+
+    const profsList = query ? matchedProfessions : dept.professions;
+    profsList.forEach(prof => {
+      const isChecked = selectedProjectRoles.includes(prof);
+      const row = document.createElement('label');
+      row.className = 'flex items-center gap-2 py-1 px-1.5 rounded-lg hover:bg-zinc-800/60 cursor-pointer transition-all';
+      row.innerHTML = `
+        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleRoleSelection('${prof}')" class="w-3.5 h-3.5 rounded bg-zinc-950 border-zinc-700 text-amber-500 accent-amber-500 shrink-0">
+        <span class="text-zinc-200 text-[11px] truncate">${prof}</span>
+      `;
+      deptGroup.appendChild(row);
+    });
+
+    container.appendChild(deptGroup);
+  });
+}
+
+function filterRolesDropdown() {
+  const q = document.getElementById('roles-dropdown-search').value;
+  renderRolesDropdownTree(q);
+}
+
+function toggleRoleSelection(prof) {
+  if (selectedProjectRoles.includes(prof)) {
+    selectedProjectRoles = selectedProjectRoles.filter(p => p !== prof);
+  } else {
+    selectedProjectRoles.push(prof);
+  }
+  updateSelectedRolesTriggerUI();
+}
+
+function updateSelectedRolesTriggerUI() {
+  const container = document.getElementById('project-roles-selected-tags');
+  if (!container) return;
+
+  if (selectedProjectRoles.length === 0) {
+    container.innerHTML = `<span class="text-zinc-500 text-xs">Выберите специальности...</span>`;
+  } else {
+    container.innerHTML = selectedProjectRoles.map(role => `
+      <span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
+        ${role}
+        <i onclick="event.stopPropagation(); toggleRoleSelection('${role}');" data-lucide="x" class="w-3 h-3 hover:text-white cursor-pointer"></i>
+      </span>
+    `).join('');
+    lucide.createIcons();
+  }
+}
+
+// Close Dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  const dropdown = document.getElementById('project-roles-dropdown');
+  const triggerBtn = e.target.closest('button[onclick*="toggleProjectRolesDropdown"]');
+  if (dropdown && !dropdown.contains(e.target) && !triggerBtn) {
+    dropdown.classList.add('hidden');
+  }
+});
+
 
 function submitNewProject(e) {
   e.preventDefault();
