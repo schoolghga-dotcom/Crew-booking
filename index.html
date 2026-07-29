@@ -205,6 +205,27 @@
             </select>
           </div>
 
+          <div class="space-y-1">
+            <label class="text-[11px] font-semibold text-zinc-300">Город / География</label>
+            <select id="filter-city" onchange="applyFilters()" class="w-full bg-zinc-900 lg:bg-zinc-950 border border-zinc-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none truncate">
+              <option value="">Все города</option>
+              <option value="Москва">Москва</option>
+              <option value="Санкт-Петербург">Санкт-Петербург</option>
+              <option value="Сочи">Сочи</option>
+              <option value="Екатеринбург">Екатеринбург</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-[11px] font-semibold text-zinc-300">Налоговый статус (Формат)</label>
+            <select id="filter-tax" onchange="applyFilters()" class="w-full bg-zinc-900 lg:bg-zinc-950 border border-zinc-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none truncate">
+              <option value="">Все форматы оплаты</option>
+              <option value="Самозанятый">Самозанятый (НПД)</option>
+              <option value="ИП">ИП</option>
+              <option value="Физлицо">Физлицо ГПХ</option>
+            </select>
+          </div>
+
           <div class="space-y-1.5 pt-1">
             <div class="flex items-center justify-between text-[11px]">
               <label class="font-semibold text-zinc-300">Макс. ставка</label>
@@ -689,6 +710,92 @@
     </div>
   </div>
 
+  <!-- CALL SHEET GENERATOR / PREVIEW MODAL (FilmToolz Model) -->
+  <div id="call-sheet-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-2xl w-full p-5 space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <button onclick="closeCallSheetModal()" class="absolute top-4 right-4 text-zinc-400">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+        <div>
+          <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+            <i data-lucide="file-text" class="w-5 h-5 text-cyan-400"></i> Съемочный вызывной лист (Call Sheet #102)
+          </h3>
+          <p class="text-xs text-zinc-400 mt-0.5">Фильм «Темная глубина» • Смена 12.08.2026 (День 3 из 15)</p>
+        </div>
+        <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30">Сформирован</span>
+      </div>
+
+      <!-- Call Sheet Content Grid -->
+      <div class="space-y-4 text-xs">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-zinc-950 p-3 rounded-2xl border border-zinc-800 font-mono">
+          <div>
+            <span class="text-[9px] uppercase text-zinc-500 block">Время сбора</span>
+            <strong class="text-amber-400 text-sm">07:00</strong>
+          </div>
+          <div>
+            <span class="text-[9px] uppercase text-zinc-500 block">Мотор смены</span>
+            <strong class="text-emerald-400 text-sm">08:00</strong>
+          </div>
+          <div>
+            <span class="text-[9px] uppercase text-zinc-500 block">Обед (60 мин)</span>
+            <strong class="text-zinc-300 text-sm">14:00 - 15:00</strong>
+          </div>
+          <div>
+            <span class="text-[9px] uppercase text-zinc-500 block">Окончание смены</span>
+            <strong class="text-cyan-400 text-sm">20:00 (12ч)</strong>
+          </div>
+        </div>
+
+        <div class="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-white flex items-center gap-1"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-400"></i> Локация съемок</span>
+            <span class="text-[10px] text-cyan-400">Павильон 4 • Мосфильм</span>
+          </div>
+          <p class="text-zinc-400 text-[11px]">г. Москва, ул. Мосфильмовская, д. 1. Парковка для спецтранспорта осветительного цеха у Врат №2.</p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-zinc-300 mb-2 uppercase text-[10px] tracking-wider">Вызов смены по цехам:</h4>
+          <div class="divide-y divide-zinc-800 bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden">
+            <div class="p-2.5 flex items-center justify-between">
+              <div>
+                <strong class="text-white">Операторский цех (DOP, 1st AC)</strong>
+                <span class="text-[10px] text-zinc-400 block">Михаил Соколов • Дмитрий Чернов</span>
+              </div>
+              <span class="font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">07:00</span>
+            </div>
+            <div class="p-2.5 flex items-center justify-between">
+              <div>
+                <strong class="text-white">Осветительный цех (Gaffer, Lighting)</strong>
+                <span class="text-[10px] text-cyan-300 block">Александр Волков (Гафер)</span>
+              </div>
+              <span class="font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">06:30 (Ранний заезд)</span>
+            </div>
+            <div class="p-2.5 flex items-center justify-between">
+              <div>
+                <strong class="text-white">Звуковой цех (FOH, Бум)</strong>
+                <span class="text-[10px] text-zinc-400 block">Елена Морозова</span>
+              </div>
+              <span class="font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">07:30</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2 flex justify-between items-center border-t border-zinc-800">
+          <span class="text-[10px] text-zinc-500 font-mono">Сформировано в Crew Booking Hub • E2E Sign</span>
+          <div class="flex gap-2">
+            <button type="button" onclick="closeCallSheetModal()" class="px-3.5 py-1.5 rounded-xl border border-zinc-800 font-medium text-zinc-400">Закрыть</button>
+            <button type="button" onclick="showToast('Вызывной лист выгружен в PDF!')" class="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-zinc-950 font-bold rounded-xl shadow-lg flex items-center gap-1">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Скачать PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- PROPOSE NEW SUBCATEGORY MODAL (Section 5 TZ) -->
   <div id="custom-cat-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl relative">
@@ -731,6 +838,6 @@
   </div>
 
 
-  <script src="app.js?v=1.6.0"></script>
+  <script src="app.js?v=1.7.0"></script>
 </body>
 </html>

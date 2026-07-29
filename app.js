@@ -442,6 +442,8 @@ function applyFilters() {
   const query = document.getElementById('filter-search').value.toLowerCase().trim();
   const selectedDept = document.getElementById('filter-department').value;
   const selectedProf = document.getElementById('filter-profession').value;
+  const selectedCity = document.getElementById('filter-city') ? document.getElementById('filter-city').value : '';
+  const selectedTax = document.getElementById('filter-tax') ? document.getElementById('filter-tax').value : '';
   const maxRate = Number(document.getElementById('filter-max-rate').value);
   const tfpOnly = document.getElementById('filter-tfp').checked;
   const minExp = Number(document.getElementById('filter-exp').value);
@@ -459,6 +461,8 @@ function applyFilters() {
 
     if (selectedDept && spec.primaryDepartment !== selectedDept) return false;
     if (selectedProf && !spec.subcategories.includes(selectedProf)) return false;
+    if (selectedCity && !spec.city.toLowerCase().includes(selectedCity.toLowerCase())) return false;
+    if (selectedTax && spec.paymentNotes && !spec.paymentNotes.toLowerCase().includes(selectedTax.toLowerCase())) return false;
     if (spec.shiftRate > maxRate) return false;
     if (tfpOnly && !spec.isOpenToCreative) return false;
     if (spec.yearsOfExperience < minExp) return false;
@@ -497,9 +501,11 @@ function renderGridCards(list) {
     const mainProf = spec.subcategories[0] || spec.primaryDepartment;
     const tfpBadge = spec.isOpenToCreative 
       ? `<span class="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
-           🎨 Готов к TFP
+           🎨 TFP
          </span>`
       : '';
+
+    const verifiedBadge = `<span title="Проверен системой Crew Booking" class="inline-flex items-center text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 shrink-0">✓ Verified Pro</span>`;
 
     const tagsHtml = spec.equipmentTags.slice(0, 3).map(t => 
       `<span class="text-[9px] sm:text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-zinc-850 text-zinc-300 border border-zinc-700/60 truncate max-w-[120px]">${t}</span>`
@@ -523,6 +529,7 @@ function renderGridCards(list) {
           </div>
 
           <div class="mt-2 flex flex-wrap items-center gap-1">
+            ${verifiedBadge}
             ${tfpBadge}
           </div>
 
@@ -531,7 +538,7 @@ function renderGridCards(list) {
           </div>
         </div>
 
-        <div class="pt-2.5 border-t border-zinc-800/80 flex items-center justify-between">
+        <div class="pt-2.5 border-t border-zinc-800/80 flex items-center justify-between gap-2">
           <div>
             <span class="text-[8px] uppercase text-zinc-400 font-mono block">Смена</span>
             <div class="text-xs sm:text-sm font-extrabold text-white font-mono">
@@ -539,9 +546,11 @@ function renderGridCards(list) {
             </div>
           </div>
 
-          <button onclick="openSpecialistModal('${spec.id}')" class="px-2.5 py-1.5 bg-zinc-800 hover:bg-cyan-600 hover:text-black text-white font-semibold text-[11px] rounded-xl transition-all border border-zinc-700/80 flex items-center gap-1 touch-bounce">
-            Профиль <i data-lucide="chevron-right" class="w-3 h-3"></i>
-          </button>
+          <div class="flex items-center gap-1.5">
+            <button onclick="openSpecialistModal('${spec.id}')" class="px-2.5 py-1.5 bg-zinc-800 hover:bg-cyan-600 hover:text-black text-white font-semibold text-[11px] rounded-xl transition-all border border-zinc-700/80 flex items-center gap-1 touch-bounce">
+              Профиль
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -805,6 +814,16 @@ function setCatalogLayout(layout) {
   applyFilters();
 }
 
+function openCallSheetModal() {
+  const modal = document.getElementById('call-sheet-modal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeCallSheetModal() {
+  const modal = document.getElementById('call-sheet-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
 function openCustomCategoryModal() {
   const modal = document.getElementById('custom-cat-modal');
   if (modal) modal.classList.remove('hidden');
@@ -997,9 +1016,14 @@ function renderProducerDashboard() {
           </div>
           <h4 class="font-bold text-white text-xs sm:text-sm">${proj.title}</h4>
           <p class="text-[11px] text-zinc-400 line-clamp-2">${proj.desc}</p>
-          <div class="pt-2 border-t border-zinc-800/80 flex flex-wrap items-center gap-1">
-            <span class="text-[9px] uppercase text-zinc-500 font-mono">Ищем:</span>
-            ${proj.rolesNeeded.map(r => `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">${r}</span>`).join('')}
+          <div class="pt-2 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-1">
+            <div class="flex items-center gap-1">
+              <span class="text-[9px] uppercase text-zinc-500 font-mono">Ищем:</span>
+              ${proj.rolesNeeded.map(r => `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">${r}</span>`).join('')}
+            </div>
+            <button onclick="openCallSheetModal()" class="px-2 py-1 bg-zinc-800 hover:bg-cyan-600 hover:text-black text-cyan-300 font-bold text-[10px] rounded-lg transition-all border border-zinc-700/60 flex items-center gap-1">
+              <i data-lucide="file-text" class="w-3 h-3"></i> Вызывной
+            </button>
           </div>
         </div>
       `).join('');
@@ -1472,8 +1496,7 @@ let chatMessages = {
 };
 
 function renderChatView() {
-  renderChatThreads();
-  renderActiveChatMessages();
+  selectChatThread(activeChatThreadId || 'thread-1');
 }
 
 function renderChatThreads(query = '') {
