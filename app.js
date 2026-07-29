@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   populateDepartmentFilters();
   applyFilters();
   renderInteractiveSpecCalendar();
+  renderEmployerDashboard();
   lucide.createIcons();
 });
 
@@ -39,7 +40,7 @@ function populateDepartmentFilters() {
   const customDeptSelect = document.getElementById('custom-dept-select');
   
   if (deptSelect) deptSelect.innerHTML = '<option value="">Все 9 цехов</option>';
-  if (customDeptSelect) customDeptSelect.innerHTML = '';
+  if (customDeptSelect) customDeptSelect.innerHTML = '<option value="">Выберите цех...</option>';
 
   departmentsData.forEach(dept => {
     if (deptSelect) {
@@ -55,6 +56,8 @@ function populateDepartmentFilters() {
       customDeptSelect.appendChild(optCustom);
     }
   });
+
+  onDepartmentChange();
 }
 
 function onDepartmentChange() {
@@ -207,7 +210,6 @@ function renderGridCards(list) {
   }).join('');
 }
 
-
 function renderTableRows(list) {
   const tbody = document.getElementById('catalog-table-body');
   tbody.innerHTML = list.map(spec => `
@@ -295,14 +297,18 @@ function switchModalTab(tab) {
   ['about', 'media', 'skills', 'calendar'].forEach(t => {
     document.getElementById(`modal-tab-${t}`).classList.add('hidden');
     const btn = document.getElementById(`tab-btn-${t}`);
-    btn.classList.remove('border-b-2', 'border-cyan-400', 'text-cyan-400', 'font-bold');
-    btn.classList.add('text-zinc-400', 'font-medium');
+    if (btn) {
+      btn.classList.remove('border-b-2', 'border-cyan-400', 'text-cyan-400', 'font-bold');
+      btn.classList.add('text-zinc-400', 'font-medium');
+    }
   });
 
   document.getElementById(`modal-tab-${tab}`).classList.remove('hidden');
   const activeBtn = document.getElementById(`tab-btn-${tab}`);
-  activeBtn.classList.add('border-b-2', 'border-cyan-400', 'text-cyan-400', 'font-bold');
-  activeBtn.classList.remove('text-zinc-400', 'font-medium');
+  if (activeBtn) {
+    activeBtn.classList.add('border-b-2', 'border-cyan-400', 'text-cyan-400', 'font-bold');
+    activeBtn.classList.remove('text-zinc-400', 'font-medium');
+  }
 }
 
 function renderModalCalendar(busyDates) {
@@ -363,6 +369,27 @@ function toggleMyDateAvailability(dateStr) {
 }
 
 function saveSpecialistProfile() {
+  const spec = specialistsData.find(s => s.id === 'spec-1') || specialistsData[0];
+  if (spec) {
+    const nameEl = document.getElementById('my-spec-name');
+    const cityEl = document.getElementById('my-spec-city');
+    const rateEl = document.getElementById('my-spec-rate');
+    const expEl = document.getElementById('my-spec-exp');
+    const tfpEl = document.getElementById('my-spec-tfp');
+    const tagsEl = document.getElementById('my-spec-tags');
+    const showreelEl = document.getElementById('my-spec-showreel');
+    const bioEl = document.getElementById('my-spec-bio');
+
+    if (nameEl && nameEl.value) spec.name = nameEl.value.trim();
+    if (cityEl && cityEl.value) spec.city = cityEl.value.trim();
+    if (rateEl && rateEl.value) spec.shiftRate = Number(rateEl.value) || spec.shiftRate;
+    if (expEl && expEl.value) spec.yearsOfExperience = Number(expEl.value) || spec.yearsOfExperience;
+    if (tfpEl) spec.isOpenToCreative = tfpEl.checked;
+    if (tagsEl && tagsEl.value) spec.equipmentTags = tagsEl.value.split(',').map(t => t.trim()).filter(Boolean);
+    if (showreelEl && showreelEl.value) spec.showreelUrl = showreelEl.value.trim();
+    if (bioEl && bioEl.value) spec.bio = bioEl.value.trim();
+  }
+  applyFilters();
   showToast('Профиль соискателя успешно сохранен!');
 }
 
@@ -383,17 +410,22 @@ function setCatalogLayout(layout) {
 }
 
 function openCustomCategoryModal() {
-  document.getElementById('custom-cat-modal').classList.remove('hidden');
+  const modal = document.getElementById('custom-cat-modal');
+  if (modal) modal.classList.remove('hidden');
 }
 
 function closeCustomCategoryModal() {
-  document.getElementById('custom-cat-modal').classList.add('hidden');
+  const modal = document.getElementById('custom-cat-modal');
+  if (modal) modal.classList.add('hidden');
 }
 
 function submitCustomCategory(e) {
   e.preventDefault();
+  const catInput = document.getElementById('custom-subcat-input');
+  const catName = catInput ? catInput.value.trim() : '';
+  if (catInput) catInput.value = '';
   closeCustomCategoryModal();
-  showToast('Заявка на профессию отправлена в админ-панель!');
+  showToast(`Заявка на профессию «${catName || 'Новая'}» отправлена в админ-панель!`);
 }
 
 function switchNav(nav) {
@@ -431,14 +463,85 @@ function switchNav(nav) {
 }
 
 function resetFilters() {
-  document.getElementById('filter-search').value = '';
-  document.getElementById('filter-department').value = '';
-  document.getElementById('filter-profession').value = '';
-  document.getElementById('filter-max-rate').value = 100000;
-  document.getElementById('filter-tfp').checked = false;
-  document.getElementById('filter-exp').value = 0;
-  document.getElementById('filter-showreel').checked = false// Employer Roles Selection Panel Logic
+  const searchEl = document.getElementById('filter-search');
+  if (searchEl) searchEl.value = '';
+
+  const deptEl = document.getElementById('filter-department');
+  if (deptEl) deptEl.value = '';
+
+  const rateEl = document.getElementById('filter-max-rate');
+  if (rateEl) {
+    rateEl.value = 100000;
+    onRateInput(100000);
+  }
+
+  const tfpEl = document.getElementById('filter-tfp');
+  if (tfpEl) tfpEl.checked = false;
+
+  const expEl = document.getElementById('filter-exp');
+  if (expEl) {
+    expEl.value = 0;
+    onExpInput(0);
+  }
+
+  const reelEl = document.getElementById('filter-showreel');
+  if (reelEl) reelEl.checked = false;
+
+  const dateEl = document.getElementById('filter-date');
+  if (dateEl) dateEl.value = '';
+
+  onDepartmentChange();
+}
+
+// Employer Roles Selection Panel Logic & Projects Data
 let selectedProjectRoles = ["Гафер (Gaffer)", "Фокус-пуллер (1st AC)"];
+
+let employerProjects = [
+  {
+    id: 'proj-1',
+    title: 'Фильм «Темная глубина»',
+    dates: '12.08 - 15.08.2026',
+    statusText: 'В работе',
+    statusClass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    desc: 'Мосфильм. Бюджет смены: 50 000 ₽ / чел.',
+    specialistName: 'Александр В.',
+    roleName: 'Гафер',
+    bookingStatus: 'Подтверждено',
+    bookingStatusClass: 'bg-emerald-500/20 text-emerald-400'
+  },
+  {
+    id: 'proj-2',
+    title: 'Клип «Skyline Echoes»',
+    dates: '20.08.2026',
+    statusText: 'Сбор смены',
+    statusClass: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+    desc: 'Крокус Сити. Нужен FOH (Midas M32).',
+    specialistName: 'Елена М.',
+    roleName: 'Звукорежиссер',
+    bookingStatus: 'В ожидании',
+    bookingStatusClass: 'bg-amber-500/20 text-amber-400'
+  }
+];
+
+function renderEmployerDashboard() {
+  const container = document.getElementById('employer-projects-list');
+  if (!container) return;
+
+  container.innerHTML = employerProjects.map(proj => `
+    <div class="glass-card p-3.5 rounded-2xl space-y-2">
+      <div class="flex items-center justify-between text-[11px]">
+        <span class="font-mono text-[9px] px-2 py-0.5 rounded ${proj.statusClass} border font-bold">${proj.statusText}</span>
+        <span class="text-zinc-400 font-mono text-[10px]">${proj.dates}</span>
+      </div>
+      <h4 class="font-bold text-white text-xs sm:text-sm">${proj.title}</h4>
+      <p class="text-[11px] text-zinc-400 line-clamp-2">${proj.desc}</p>
+      <div class="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px]">
+        <span class="text-zinc-400 truncate">${proj.roleName}: <strong class="text-emerald-400">${proj.specialistName}</strong></span>
+        <span class="px-2 py-0.5 rounded ${proj.bookingStatusClass} font-bold shrink-0">${proj.bookingStatus}</span>
+      </div>
+    </div>
+  `).join('');
+}
 
 function openCreateProjectModal() {
   document.getElementById('create-project-modal').classList.remove('hidden');
@@ -507,10 +610,19 @@ function renderRolesDropdownTree(searchQuery = '') {
       const isChecked = selectedProjectRoles.includes(prof);
       const row = document.createElement('label');
       row.className = 'flex items-center gap-2 py-1 px-1.5 rounded-lg hover:bg-zinc-900 cursor-pointer transition-all';
-      row.innerHTML = `
-        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleRoleSelection('${prof}')" class="w-3.5 h-3.5 rounded bg-zinc-950 border-zinc-700 text-amber-500 accent-amber-500 shrink-0">
-        <span class="text-zinc-200 text-[11px] truncate">${prof}</span>
-      `;
+      
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.checked = isChecked;
+      input.className = 'w-3.5 h-3.5 rounded bg-zinc-950 border-zinc-700 text-amber-500 accent-amber-500 shrink-0';
+      input.onchange = () => toggleRoleSelection(prof);
+
+      const span = document.createElement('span');
+      span.className = 'text-zinc-200 text-[11px] truncate';
+      span.textContent = prof;
+
+      row.appendChild(input);
+      row.appendChild(span);
       deptGroup.appendChild(row);
     });
 
@@ -532,6 +644,21 @@ function toggleRoleSelection(prof) {
     selectedProjectRoles.push(prof);
   }
   updateSelectedRolesTriggerUI();
+  const panel = document.getElementById('project-roles-panel');
+  if (panel && !panel.classList.contains('hidden')) {
+    const searchInput = document.getElementById('roles-dropdown-search');
+    renderRolesDropdownTree(searchInput ? searchInput.value : '');
+  }
+}
+
+function removeRoleByIndex(index) {
+  selectedProjectRoles.splice(index, 1);
+  updateSelectedRolesTriggerUI();
+  const panel = document.getElementById('project-roles-panel');
+  if (panel && !panel.classList.contains('hidden')) {
+    const searchInput = document.getElementById('roles-dropdown-search');
+    renderRolesDropdownTree(searchInput ? searchInput.value : '');
+  }
 }
 
 function updateSelectedRolesTriggerUI() {
@@ -541,17 +668,41 @@ function updateSelectedRolesTriggerUI() {
   if (selectedProjectRoles.length === 0) {
     container.innerHTML = `<span class="text-zinc-500 text-xs">Нажмите, чтобы выбрать специальности...</span>`;
   } else {
-    container.innerHTML = selectedProjectRoles.map(role => `
+    container.innerHTML = selectedProjectRoles.map((role, idx) => `
       <span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
         ${role}
-        <span onclick="event.stopPropagation(); toggleRoleSelection('${role}');" class="hover:text-white font-bold cursor-pointer ml-0.5">✕</span>
+        <span onclick="event.stopPropagation(); removeRoleByIndex(${idx});" class="hover:text-white font-bold cursor-pointer ml-0.5">✕</span>
       </span>
     `).join('');
   }
 }
+
 function submitNewProject(e) {
   e.preventDefault();
-  const name = document.getElementById('project-name-input').value.trim();
+  const nameInput = document.getElementById('project-name-input');
+  const budgetInput = document.getElementById('project-budget-input');
+  const descInput = document.getElementById('project-desc-input');
+  const dateInput = document.getElementById('project-start-date');
+
+  const name = nameInput ? nameInput.value.trim() : 'Съемочный проект';
+  const budget = budgetInput ? budgetInput.value : '45000';
+  const desc = descInput ? descInput.value.trim() : 'Павильонные съемки';
+  const startDate = dateInput && dateInput.value ? dateInput.value.split('-').reverse().join('.') : 'Скоро';
+
+  employerProjects.unshift({
+    id: `proj-${Date.now()}`,
+    title: name,
+    dates: startDate,
+    statusText: 'Сбор смены',
+    statusClass: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+    desc: `${desc || 'Описание не указано'}. Бюджет: ${Number(budget).toLocaleString('ru-RU')} ₽`,
+    specialistName: selectedProjectRoles.length > 0 ? selectedProjectRoles[0] : 'Специалист',
+    roleName: 'Поиск',
+    bookingStatus: 'В ожидании',
+    bookingStatusClass: 'bg-amber-500/20 text-amber-400'
+  });
+
+  renderEmployerDashboard();
   closeCreateProjectModal();
   switchNav('dashboard-prod');
   showToast(`Проект «${name}» опубликован! Вы можете забронировать специалистов.`);
@@ -560,16 +711,32 @@ function submitNewProject(e) {
 function bookingRequestAction() {
   closeSpecialistModal();
   if (activeModalSpecialist) {
+    const mainRole = activeModalSpecialist.subcategories[0] || 'Специалист';
+    employerProjects.unshift({
+      id: `proj-${Date.now()}`,
+      title: `Съемка с ${activeModalSpecialist.name}`,
+      dates: 'Август 2026',
+      statusText: 'Вызов на съемку',
+      statusClass: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+      desc: `Приглашение для ${activeModalSpecialist.name} (${mainRole}). Ставка: ${activeModalSpecialist.shiftRate.toLocaleString('ru-RU')} ₽.`,
+      specialistName: activeModalSpecialist.name,
+      roleName: mainRole,
+      bookingStatus: 'В ожидании',
+      bookingStatusClass: 'bg-amber-500/20 text-amber-400'
+    });
+    renderEmployerDashboard();
     showToast(`Приглашение на съемку отправлено специалисту ${activeModalSpecialist.name}! Заявка отображается в Кабинете Нанимателя.`);
   }
 }
 
 function showToast(msg) {
   const toast = document.getElementById('toast');
+  if (!toast) return;
   document.getElementById('toast-message').textContent = msg;
   toast.classList.remove('hidden');
   setTimeout(() => {
     toast.classList.add('hidden');
   }, 3500);
 }
+
 

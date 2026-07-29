@@ -145,7 +145,7 @@
         <div>
           <h1 class="text-sm sm:text-xl font-bold text-white flex items-center justify-between sm:justify-start gap-2">
             <span>База персонала</span>
-            <span id="results-count" class="text-[10px] sm:text-xs bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-semibold px-2 py-0.5 rounded-full shrink-0">6 спец.</span>
+            <span id="results-count" class="text-[10px] sm:text-xs bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-semibold px-2 py-0.5 rounded-full shrink-0">12 спец.</span>
           </h1>
           <p class="text-[10px] sm:text-xs text-zinc-400 mt-0.5 line-clamp-1">Фильтрация по оборудованию (grandMA2, Midas M32, Accsoon), цехам и датам.</p>
         </div>
@@ -235,6 +235,12 @@
           <div class="space-y-1 pt-2 border-t border-zinc-800">
             <label class="text-[11px] font-semibold text-zinc-300">Свободен в дату</label>
             <input type="date" id="filter-date" onchange="applyFilters()" class="w-full bg-zinc-900 lg:bg-zinc-950 border border-zinc-800 rounded-xl px-2.5 py-2 text-xs text-white">
+          </div>
+
+          <div class="pt-2 border-t border-zinc-800">
+            <button type="button" onclick="openCustomCategoryModal()" class="w-full py-1.5 px-2 bg-zinc-850 hover:bg-zinc-800 border border-zinc-700/80 rounded-xl text-[11px] font-medium text-cyan-400 flex items-center justify-center gap-1.5 transition-all">
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Предложить профессию
+            </button>
           </div>
 
           <div class="lg:hidden pt-2">
@@ -377,33 +383,7 @@
             <i data-lucide="folder-kanban" class="w-4 h-4 text-cyan-400"></i> Мои съемки и бронирования
           </h3>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div class="glass-card p-3.5 rounded-2xl space-y-2">
-              <div class="flex items-center justify-between text-[11px]">
-                <span class="font-mono text-[9px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">В работе</span>
-                <span class="text-zinc-400 font-mono text-[10px]">12.08 - 15.08.2026</span>
-              </div>
-              <h4 class="font-bold text-white text-xs sm:text-sm">Фильм «Темная глубина»</h4>
-              <p class="text-[11px] text-zinc-400 line-clamp-2">Мосфильм. Бюджет смены: 50 000 ₽ / чел.</p>
-              <div class="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px]">
-                <span class="text-zinc-400 truncate">Гафер: <strong class="text-emerald-400">Александр В.</strong></span>
-                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold shrink-0">Подтверждено</span>
-              </div>
-            </div>
-
-            <div class="glass-card p-3.5 rounded-2xl space-y-2">
-              <div class="flex items-center justify-between text-[11px]">
-                <span class="font-mono text-[9px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold">Сбор смены</span>
-                <span class="text-zinc-400 font-mono text-[10px]">20.08.2026</span>
-              </div>
-              <h4 class="font-bold text-white text-xs sm:text-sm">Клип «Skyline Echoes»</h4>
-              <p class="text-[11px] text-zinc-400 line-clamp-2">Крокус Сити. Нужен FOH (Midas M32).</p>
-              <div class="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px]">
-                <span class="text-zinc-400 truncate">Звукорежиссер: <strong class="text-cyan-400">Елена М.</strong></span>
-                <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold shrink-0">В ожидании</span>
-              </div>
-            </div>
-          </div>
+          <div id="employer-projects-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
         </div>
       </div>
     </div>
@@ -560,6 +540,41 @@
         <div class="pt-2 flex justify-end gap-2">
           <button type="button" onclick="closeCreateProjectModal()" class="px-3.5 py-2 rounded-xl border border-zinc-800 font-medium text-zinc-400">Отмена</button>
           <button type="submit" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-xl shadow-lg">Опубликовать</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- PROPOSE NEW SUBCATEGORY MODAL (Section 5 TZ) -->
+  <div id="custom-cat-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl relative">
+      <button onclick="closeCustomCategoryModal()" class="absolute top-4 right-4 text-zinc-400">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div>
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-cyan-400"></i> Предложить новую профессию
+        </h3>
+        <p class="text-xs text-zinc-400 mt-0.5">Заявка на добавление специальности в общий справочник сайта.</p>
+      </div>
+
+      <form onsubmit="submitCustomCategory(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-zinc-300 mb-1">Цех / Категория</label>
+          <select id="custom-dept-select" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-white">
+            <option value="">Выберите цех...</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-zinc-300 mb-1">Название профессии</label>
+          <input type="text" id="custom-subcat-input" required placeholder="Например: Оператор Mo-Sys трекинга" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-white">
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeCustomCategoryModal()" class="px-3.5 py-2 rounded-xl border border-zinc-800 font-medium text-zinc-400">Отмена</button>
+          <button type="submit" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-zinc-950 font-bold rounded-xl shadow-lg">Отправить на модерацию</button>
         </div>
       </form>
     </div>
