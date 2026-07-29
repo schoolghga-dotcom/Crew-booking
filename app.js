@@ -446,10 +446,29 @@ function resetFilters() {
   onDepartmentChange();
 }
 
+function openCreateProjectModal() {
+  document.getElementById('create-project-modal').classList.remove('hidden');
+}
+
+function closeCreateProjectModal() {
+  document.getElementById('create-project-modal').classList.add('hidden');
+}
+
+function submitNewProject(e) {
+  e.preventDefault();
+  const name = document.getElementById('project-name-input').value.trim();
+  closeCreateProjectModal();
+  switchNav('dashboard-prod');
+  showToast(`Проект «${name}» опубликован! Вы можете забронировать специалистов.`);
+}
+
 function bookingRequestAction() {
   closeSpecialistModal();
-  showToast(`Запрос бронирования отправлен специалисту ${activeModalSpecialist ? activeModalSpecialist.name : ''}!`);
+  if (activeModalSpecialist) {
+    showToast(`Приглашение на съемку отправлено специалисту ${activeModalSpecialist.name}! Заявка отображается в Кабинете Нанимателя.`);
+  }
 }
+
 
 function showToast(msg) {
   const toast = document.getElementById('toast');

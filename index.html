@@ -492,11 +492,61 @@
     </div>
   </div>
 
+  <!-- CREATE PROJECT MODAL (Employer Scenario) -->
+  <div id="create-project-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl relative">
+      <button onclick="closeCreateProjectModal()" class="absolute top-4 right-4 text-zinc-400">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div>
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-amber-400"></i> Новый съемочный проект
+        </h3>
+        <p class="text-xs text-zinc-400 mt-0.5">Публикация вакансии и формирование команды.</p>
+      </div>
+
+      <form onsubmit="submitNewProject(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-zinc-300 mb-1">Название проекта / фильма</label>
+          <input type="text" id="project-name-input" required placeholder="Например: Сериал «Ночной заслон»" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-white">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-zinc-300 mb-1">Дата начала</label>
+            <input type="date" id="project-start-date" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-2.5 py-2 text-white">
+          </div>
+          <div>
+            <label class="block font-semibold text-zinc-300 mb-1">Бюджет смены (₽)</label>
+            <input type="number" id="project-budget-input" required placeholder="45000" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-2.5 py-2 text-white font-mono">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-zinc-300 mb-1">Ищем специалистов (цех / профессия)</label>
+          <input type="text" id="project-roles-input" required placeholder="Гафер (grandMA2), Фокус-пуллер, Звукорежиссер" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-white">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-zinc-300 mb-1">Описание и требования</label>
+          <textarea id="project-desc-input" rows="2" placeholder="Локация: Павильон Мосфильм..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white"></textarea>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeCreateProjectModal()" class="px-3.5 py-2 rounded-xl border border-zinc-800 font-medium text-zinc-400">Отмена</button>
+          <button type="submit" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-xl shadow-lg">Опубликовать</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-16 lg:bottom-5 right-3 left-3 lg:left-auto z-50 hidden bg-zinc-900 border border-emerald-500/40 text-white px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2.5 text-xs">
     <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i>
     <span id="toast-message" class="truncate">Успешно!</span>
   </div>
+
 
   <script src="app.js"></script>
 </body>
