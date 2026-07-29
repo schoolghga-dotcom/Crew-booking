@@ -524,22 +524,22 @@
         </div>
 
         <!-- Tree Checkboxes Multiselect for Departments & Professions -->
-        <div class="relative">
-          <label class="block font-semibold text-zinc-300 mb-1">Ищем специалистов (выбор нескольких в цехах)</label>
+        <div class="space-y-1 relative">
+          <label class="block font-semibold text-zinc-300">Ищем специалистов (выберите из списка)</label>
           
           <!-- Trigger Button -->
-          <button type="button" onclick="toggleProjectRolesDropdown()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-left flex items-center justify-between text-white hover:border-zinc-700 transition-all">
+          <button type="button" id="roles-dropdown-trigger" onclick="toggleProjectRolesDropdown(event)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-left flex items-center justify-between text-white hover:border-cyan-500 transition-all cursor-pointer">
             <div id="project-roles-selected-tags" class="flex flex-wrap gap-1 items-center min-w-0 pr-2">
               <span class="text-zinc-500 text-xs">Выберите специальности...</span>
             </div>
-            <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-400 shrink-0"></i>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-cyan-400 shrink-0"></i>
           </button>
 
-          <!-- Dropdown List with Search & Department Checkboxes -->
-          <div id="project-roles-dropdown" class="hidden absolute left-0 right-0 top-full mt-1.5 z-50 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-2.5 space-y-2 max-h-60 overflow-y-auto backdrop-blur-xl">
-            <div class="relative">
+          <!-- Dropdown List Container -->
+          <div id="project-roles-dropdown" class="hidden w-full bg-zinc-950 border border-cyan-500/50 rounded-xl p-2.5 space-y-2 max-h-52 overflow-y-auto mt-1 shadow-2xl">
+            <div class="relative sticky top-0 z-10 bg-zinc-950 pb-1">
               <i data-lucide="search" class="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-2.5"></i>
-              <input type="text" id="roles-dropdown-search" oninput="filterRolesDropdown()" placeholder="Поиск профессии (Гафер, 1st AC)..." class="w-full bg-zinc-950 border border-zinc-800 rounded-lg pl-8 pr-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-cyan-500">
+              <input type="text" id="roles-dropdown-search" oninput="filterRolesDropdown()" placeholder="Быстрый поиск профессии..." class="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-8 pr-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-cyan-500">
             </div>
 
             <div id="roles-checkboxes-container" class="space-y-2 text-[11px]">
@@ -547,6 +547,7 @@
             </div>
           </div>
         </div>
+
 
 
         <div>

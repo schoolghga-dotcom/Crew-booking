@@ -460,12 +460,12 @@ function closeCreateProjectModal() {
   document.getElementById('project-roles-dropdown').classList.add('hidden');
 }
 
-function toggleProjectRolesDropdown() {
+function toggleProjectRolesDropdown(e) {
+  if (e) e.stopPropagation();
   const dropdown = document.getElementById('project-roles-dropdown');
   if (!dropdown) return;
   
-  const isHidden = dropdown.classList.contains('hidden');
-  if (isHidden) {
+  if (dropdown.classList.contains('hidden')) {
     renderRolesDropdownTree();
     dropdown.classList.remove('hidden');
   } else {
@@ -475,13 +475,12 @@ function toggleProjectRolesDropdown() {
 
 function getActiveDepartmentsList() {
   if (departmentsData && departmentsData.length > 0) return departmentsData;
-  // Direct Fallback if fetch is delayed
   return [
     {"name":"1. Операторский цех и Камера","professions":["Оператор-постановщик (DOP)","Оператор / Камерамен","Второй оператор","Фокус-пуллер (1st AC)","Камера-механик (2nd AC)","Стедикамист","Оператор крана / коптера","DIT (Digital Imaging Technician)","Видеоинженер / Плейбэкер"]},
     {"name":"2. Цех Света (Светотехника)","professions":["Художник по свету (Lighting Designer)","Гафер (Gaffer)","Оператор светового пульта","Системный инженер (Art-Net / DMX / Сети)","Осветитель (Lighting Technician)","Бестбой (Best Boy Electric)","Художник превизуализации"]},
     {"name":"3. Цех Звука","professions":["Звукорежиссер на площадке / Саунд-дизайнер","Звукорежиссер FOH (Front of House)","Мониторный звукорежиссер","Бум-оператор (Микрофонщик)","Системный инженер (Звук)","RF-менеджер (Радиочастоты)","Техник по звуку"]},
     {"name":"4. Продюсерский цех","professions":["Генеральный / Исполнительный продюсер","Креативный продюсер","Линейный продюсер","Шоу-раннер","Директор картины / площадки (UPM)","Локейшен-менеджер (Location Manager)","Администратор площадки"]},
-    {"name":"5. Режиссерский цех","professions":["Режиссер-постановщик","Второй режиссер (1st AD - планирование)","Второй режиссер (2nd AD - площадка)","Помощник режиссера (Скрипт-супервайзер)","Кастинг-директор","Ассистент по актерам","Бригадир АМС (Массовка)","Хлопушка"]},
+    {"name":"5. Режиссерский цех","professions":["Режиссер-постановщик","Второй режиссер (1st AD - планирование)","Второй режиссер (2nd AD - площадка)","Помощник режиссер (Скрипт-супервайзер)","Кастинг-директор","Ассистент по актерам","Бригадир АМС (Массовка)","Хлопушка"]},
     {"name":"6. Художественный цех (Art Department)","professions":["Художник-постановщик","Арт-директор","Декоратор","Постановщик","Художник по реквизиту / Реквизитор","Бутафор"]},
     {"name":"7. Костюм и Грим","professions":["Художник по костюмам","Ассистент по костюмам / Костюмер","Художник по гриму / Главный гример","Гример-визажист","Мастер по спецэффектам (SFX Makeup)"]},
     {"name":"8. Сценический комплекс и Механика (Грип / Риггинг)","professions":["Долли-грип (Кран / Тележка)","Кей-грип (Key Grip)","Машинист сцены / Стейджхэнд","Риггер (Высотные работы / Подвесы)"]},
@@ -513,7 +512,7 @@ function renderRolesDropdownTree(searchQuery = '') {
     profsList.forEach(prof => {
       const isChecked = selectedProjectRoles.includes(prof);
       const row = document.createElement('label');
-      row.className = 'flex items-center gap-2 py-1 px-1.5 rounded-lg hover:bg-zinc-800 cursor-pointer transition-all';
+      row.className = 'flex items-center gap-2 py-1 px-1.5 rounded-lg hover:bg-zinc-900 cursor-pointer transition-all';
       row.innerHTML = `
         <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleRoleSelection('${prof}')" class="w-3.5 h-3.5 rounded bg-zinc-950 border-zinc-700 text-amber-500 accent-amber-500 shrink-0">
         <span class="text-zinc-200 text-[11px] truncate">${prof}</span>
@@ -523,7 +522,9 @@ function renderRolesDropdownTree(searchQuery = '') {
 
     container.appendChild(deptGroup);
   });
+  lucide.createIcons();
 }
+
 
 
 function filterRolesDropdown() {
