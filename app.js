@@ -1,26 +1,360 @@
 // Crew Booking Platform Logic Engine
 
+const DEFAULT_DEPARTMENTS_DATA = [
+  {
+    "id": "camera",
+    "name": "1. Операторский цех и Камера",
+    "professions": ["Оператор-постановщик (DOP)", "Оператор / Камерамен", "Второй оператор", "Фокус-пуллер (1st AC)", "Камера-механик (2nd AC)", "Стедикамист", "Оператор крана / коптера", "DIT (Digital Imaging Technician)", "Видеоинженер / Плейбэкер"]
+  },
+  {
+    "id": "lighting",
+    "name": "2. Цех Света (Светотехника)",
+    "professions": ["Художник по свету (Lighting Designer)", "Гафер (Gaffer)", "Оператор светового пульта", "Системный инженер (Art-Net / DMX / Сети)", "Осветитель (Lighting Technician)", "Бестбой (Best Boy Electric)", "Художник превизуализации"]
+  },
+  {
+    "id": "sound",
+    "name": "3. Цех Звука",
+    "professions": ["Звукорежиссер на площадке / Саунд-дизайнер", "Звукорежиссер FOH (Front of House)", "Мониторный звукорежиссер", "Бум-оператор (Микрофонщик)", "Системный инженер (Звук)", "RF-менеджер (Радиочастоты)", "Техник по звуку"]
+  },
+  {
+    "id": "producing",
+    "name": "4. Продюсерский цех",
+    "professions": ["Генеральный / Исполнительный продюсер", "Креативный продюсер", "Линейный продюсер", "Шоу-раннер", "Директор картины / площадки (UPM)", "Локейшен-менеджер (Location Manager)", "Администратор площадки"]
+  },
+  {
+    "id": "directing",
+    "name": "5. Режиссерский цех",
+    "professions": ["Режиссер-постановщик", "Второй режиссер (1st AD - планирование)", "Второй режиссер (2nd AD - площадка)", "Помощник режиссер (Скрипт-супервайзер)", "Кастинг-директор", "Ассистент по актерам", "Бригадир АМС (Массовка)", "Хлопушка"]
+  },
+  {
+    "id": "art",
+    "name": "6. Художественный цех (Art Department)",
+    "professions": ["Художник-постановщик", "Арт-директор", "Декоратор", "Постановщик", "Художник по реквизиту / Реквизитор", "Бутафор"]
+  },
+  {
+    "id": "costume",
+    "name": "7. Костюм и Грим",
+    "professions": ["Художник по костюмам", "Ассистент по костюмам / Костюмер", "Художник по гриму / Главный гример", "Гример-визажист", "Мастер по спецэффектам (SFX Makeup)"]
+  },
+  {
+    "id": "grip",
+    "name": "8. Сценический комплекс и Механика (Грип / Риггинг)",
+    "professions": ["Долли-грип (Кран / Тележка)", "Кей-грип (Key Grip)", "Машинист сцены / Стейджхэнд", "Риггер (Высотные работы / Подвесы)"]
+  },
+  {
+    "id": "post",
+    "name": "9. Пост-продакшен (Монтаж и VFX)",
+    "professions": ["Режиссер монтажа", "Колорист", "VFX-супервайзер", "CG-Artist / Моушн-дизайнер", "Звукорежиссер пост-продакшена"]
+  }
+];
+
+const DEFAULT_SPECIALISTS_DATA = [
+  {
+    "id": "spec-1",
+    "name": "Александр Волков",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "2. Цех Света (Светотехника)",
+    "subcategories": ["Художник по свету (Lighting Designer)", "Гафер (Gaffer)", "Оператор светового пульта"],
+    "city": "Москва",
+    "shiftRate": 45000,
+    "isOpenToCreative": true,
+    "yearsOfExperience": 8,
+    "projectsCount": 64,
+    "education": "СПбГИК (Светорежиссура, 2016)",
+    "rating": 4.9,
+    "reviewsCount": 28,
+    "equipmentTags": ["grandMA2", "grandMA3", "Avolites Titan", "Blackout", "Capture 2023"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "Светодизайнер со стажем работы на стадионных шоу, съёмках музыкальных клипов и кино. В совершенстве владею пультами grandMA2/3, симуляцией в Capture.",
+    "paymentNotes": "Оплата ИП / Самозанятый. Предоплата 30% на предвизе.",
+    "busyDates": ["2026-08-01", "2026-08-02", "2026-08-05", "2026-08-15"]
+  },
+  {
+    "id": "spec-2",
+    "name": "Михаил Соколов",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "1. Операторский цех и Камера",
+    "subcategories": ["Оператор-постановщик (DOP)", "Стедикамист"],
+    "city": "Санкт-Петербург",
+    "shiftRate": 65000,
+    "isOpenToCreative": false,
+    "yearsOfExperience": 11,
+    "projectsCount": 92,
+    "education": "ВГИК (Операторский факультет, 2015)",
+    "rating": 5.0,
+    "reviewsCount": 42,
+    "equipmentTags": ["ARRI Alexa Mini", "RED V-Raptor", "Steadicam Zephyr", "Cooke Anamorphic", "SmallRig"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "Кинооператор и стедикамист. Рекламные ролики крупных брендов, полнометражные фильмы и клипы.",
+    "paymentNotes": "ООО / ИП. Выезд в экспедиции со своим комплектом.",
+    "busyDates": ["2026-08-03", "2026-08-04", "2026-08-10", "2026-08-11"]
+  },
+  {
+    "id": "spec-3",
+    "name": "Елена Морозова",
+    "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "3. Цех Звука",
+    "subcategories": ["Звукорежиссер FOH (Front of House)", "Системный инженер (Звук)"],
+    "city": "Москва",
+    "shiftRate": 35000,
+    "isOpenToCreative": true,
+    "yearsOfExperience": 6,
+    "projectsCount": 48,
+    "education": "МГК им. Чайковского (Акустика, 2018)",
+    "rating": 4.8,
+    "reviewsCount": 19,
+    "equipmentTags": ["Midas M32", "Behringer SD8", "Sennheiser EW-DX", "RF-Explorer", "Dante Controller"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "FOH-звукорежиссер и радиочастотный менеджер. Настройка Dante-сетей и радиосистем любой плотности.",
+    "paymentNotes": "Наличный / Безналичный расчет. Готова к TFP фестивалям.",
+    "busyDates": ["2026-08-08", "2026-08-09", "2026-08-20"]
+  },
+  {
+    "id": "spec-4",
+    "name": "Дмитрий Чернов",
+    "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "1. Операторский цех и Камера",
+    "subcategories": ["Фокус-пуллер (1st AC)", "DIT (Digital Imaging Technician)"],
+    "city": "Москва",
+    "shiftRate": 28000,
+    "isOpenToCreative": true,
+    "yearsOfExperience": 5,
+    "projectsCount": 41,
+    "education": "School of Visual Arts (2019)",
+    "rating": 4.9,
+    "reviewsCount": 23,
+    "equipmentTags": ["Tilta Nucleus-M", "Teradek Bolt 4K", "Accsoon CineView", "SmallRig", "Silverstack DIT"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "Первоклассный 1st AC (Фокус-пуллер) и DIT-инженер. Высокая точность фокуса на открытой диафрагме.",
+    "paymentNotes": "Самозанятый.",
+    "busyDates": ["2026-08-01", "2026-08-07", "2026-08-14"]
+  },
+  {
+    "id": "spec-5",
+    "name": "Виктория Белова",
+    "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "7. Костюм и Грим",
+    "subcategories": ["Художник по гриму / Главный гример", "Мастер по спецэффектам (SFX Makeup)"],
+    "city": "Казань",
+    "shiftRate": 32000,
+    "isOpenToCreative": true,
+    "yearsOfExperience": 7,
+    "projectsCount": 55,
+    "education": "Mosmake SFX (2017)",
+    "rating": 5.0,
+    "reviewsCount": 34,
+    "equipmentTags": ["SFX Prosthetics", "Airbrush Temptu", "Silicone Molding", "Stage Blood FX"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "Пластический грим любой сложности, раны, старение, персонажи для хорроров и исторического кино.",
+    "paymentNotes": "Оплата за смену + материалы по чекам.",
+    "busyDates": ["2026-08-06", "2026-08-18", "2026-08-19"]
+  },
+  {
+    "id": "spec-6",
+    "name": "Игорь Ковалев",
+    "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "8. Сценический комплекс и Механика (Грип / Риггинг)",
+    "subcategories": ["Кей-грип (Key Grip)", "Риггер (Высотные работы / Подвесы)"],
+    "city": "Москва",
+    "shiftRate": 42000,
+    "isOpenToCreative": false,
+    "yearsOfExperience": 10,
+    "projectsCount": 115,
+    "education": "IRATA Level 2 Альпинизм",
+    "rating": 4.9,
+    "reviewsCount": 41,
+    "equipmentTags": ["Prolyte Truss", "CM Lodestar Hoist", "Rigging Hardware", "Safety Harness"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "Безопасный подвес ферм, световых приборов и экранов на стадионах и кинопавильонах.",
+    "paymentNotes": "ИП с НДС / Безнал.",
+    "busyDates": ["2026-08-02", "2026-08-13", "2026-08-22"]
+  },
+  {
+    "id": "spec-7",
+    "name": "Максим Громов",
+    "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "4. Продюсерский цех",
+    "subcategories": ["Директор картины / площадки (UPM)", "Линейный продюсер"],
+    "city": "Москва",
+    "shiftRate": 50000,
+    "isOpenToCreative": false,
+    "yearsOfExperience": 9,
+    "projectsCount": 78,
+    "education": "ГИК (Продюсирование, 2015)",
+    "rating": 4.9,
+    "reviewsCount": 36,
+    "equipmentTags": ["Movie Magic Scheduling", "Cellsys", "Call Sheet Pro"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "Директор площадки. Огранизация съемочного процесса до 200 человек в смене без срывов тайминга.",
+    "paymentNotes": "ООО / ИП.",
+    "busyDates": ["2026-08-05", "2026-08-06", "2026-08-07"]
+  },
+  {
+    "id": "spec-8",
+    "name": "Анастасия Крылова",
+    "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "6. Художественный цех (Art Department)",
+    "subcategories": ["Художник-постановщик", "Декоратор"],
+    "city": "Санкт-Петербург",
+    "shiftRate": 40000,
+    "isOpenToCreative": true,
+    "yearsOfExperience": 7,
+    "projectsCount": 52,
+    "education": "СПбГХПА им. Штиглица (2017)",
+    "rating": 5.0,
+    "reviewsCount": 27,
+    "equipmentTags": ["SketchUp Pro", "Blender 3D", "Set Design Tools", "Prop Sourcing"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "Художник-постановщик. Разработка эскизов, превизуализация декораций в 3D и постройка сложных павильонов.",
+    "paymentNotes": "Самозанятая.",
+    "busyDates": ["2026-08-12", "2026-08-13", "2026-08-14"]
+  },
+  {
+    "id": "spec-9",
+    "name": "Роман Лебедев",
+    "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "9. Пост-продакшен (Монтаж и VFX)",
+    "subcategories": ["Колорист", "VFX-супервайзер"],
+    "city": "Москва",
+    "shiftRate": 48000,
+    "isOpenToCreative": true,
+    "yearsOfExperience": 8,
+    "projectsCount": 84,
+    "education": "БВШД (Filmmaking, 2016)",
+    "rating": 4.9,
+    "reviewsCount": 39,
+    "equipmentTags": ["DaVinci Resolve Studio", "Tangent Wave2", "Nuke Studio", "ACES Pipeline"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "Сертифицированный колорист DaVinci Resolve. Цветокоррекция полного метра, рекламы и клипов в ACES.",
+    "paymentNotes": "ИП / Безнал.",
+    "busyDates": ["2026-08-04", "2026-08-11", "2026-08-18"]
+  },
+  {
+    "id": "spec-10",
+    "name": "Ольга Васильева",
+    "avatar": "https://images.unsplash.com/photo-1534751516642-a171e2614927?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "5. Режиссерский цех",
+    "subcategories": ["Второй режиссер (1st AD - планирование)", "Второй режиссер (2nd AD - площадка)"],
+    "city": "Москва",
+    "shiftRate": 38000,
+    "isOpenToCreative": false,
+    "yearsOfExperience": 6,
+    "projectsCount": 45,
+    "education": "ВГИК (2018)",
+    "rating": 4.8,
+    "reviewsCount": 21,
+    "equipmentTags": ["Movie Magic Budgeting", "CPTB Scheduler", "Call Sheets"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "1st AD. Составление КПП (календарно-постановочного плана), вызывных листов и ведение площадки.",
+    "paymentNotes": "Самозанятая.",
+    "busyDates": ["2026-08-09", "2026-08-10", "2026-08-16"]
+  },
+  {
+    "id": "spec-11",
+    "name": "Сергей Медведев",
+    "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "1. Операторский цех и Камера",
+    "subcategories": ["Оператор крана / коптера", "Оператор / Камерамен"],
+    "city": "Екатеринбург",
+    "shiftRate": 35000,
+    "isOpenToCreative": true,
+    "yearsOfExperience": 6,
+    "projectsCount": 59,
+    "education": "УрФУ (2017)",
+    "rating": 4.9,
+    "reviewsCount": 30,
+    "equipmentTags": ["DJI Inspire 3", "DJI FPV", "FPV Cinema Drone", "Accsoon"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "Пилот дрона и FPV-оператор. Сертификат пилота, динамичные пролеты в павильонах и на натуре.",
+    "paymentNotes": "ИП.",
+    "busyDates": ["2026-08-15", "2026-08-16", "2026-08-17"]
+  },
+  {
+    "id": "spec-12",
+    "name": "Екатерина Полякова",
+    "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "7. Костюм и Грим",
+    "subcategories": ["Художник по костюмам", "Ассистент по костюмам / Костюмер"],
+    "city": "Москва",
+    "shiftRate": 33000,
+    "isOpenToCreative": true,
+    "yearsOfExperience": 5,
+    "projectsCount": 38,
+    "education": "МХПИ (Дизайн костюма, 2019)",
+    "rating": 5.0,
+    "reviewsCount": 24,
+    "equipmentTags": ["Costume Styling", "Period Wardrobe", "Fabric Aging FX"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "Художник по костюмам. Подбор гардероба под стиль проекта, подгонка и фактуровка ткани.",
+    "paymentNotes": "Самозанятая.",
+    "busyDates": ["2026-08-03", "2026-08-21"]
+  }
+];
+
 function toggleMobileFilters() {
   const drawer = document.getElementById('mobile-filter-drawer');
-  drawer.classList.toggle('hidden');
+  if (drawer) drawer.classList.toggle('hidden');
 }
 
-let departmentsData = [];
-let specialistsData = [];
+let departmentsData = DEFAULT_DEPARTMENTS_DATA;
+let specialistsData = DEFAULT_SPECIALISTS_DATA;
 let activeLayout = 'grid';
 let activeModalSpecialist = null;
 
 // User Interactive Calendar for Specialist Dashboard
 let myBusyDates = ["2026-08-01", "2026-08-02", "2026-08-05", "2026-08-15", "2026-08-16"];
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function initApp() {
   await loadData();
   populateDepartmentFilters();
   applyFilters();
   renderInteractiveSpecCalendar();
   renderEmployerDashboard();
-  lucide.createIcons();
-});
+  if (window.lucide) window.lucide.createIcons();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 
 async function loadData() {
   try {
@@ -28,10 +362,14 @@ async function loadData() {
       fetch('./data/departments.json'),
       fetch('./data/specialists.json')
     ]);
-    departmentsData = await deptRes.json();
-    specialistsData = await specRes.json();
+    if (deptRes.ok && specRes.ok) {
+      const depts = await deptRes.json();
+      const specs = await specRes.json();
+      if (Array.isArray(depts) && depts.length > 0) departmentsData = depts;
+      if (Array.isArray(specs) && specs.length > 0) specialistsData = specs;
+    }
   } catch (err) {
-    console.error('Error loading JSON data:', err);
+    console.warn('Loading fallback data due to fetch restriction/network:', err);
   }
 }
 
