@@ -338,7 +338,6 @@ let specialistsData = DEFAULT_SPECIALISTS_DATA;
 let activeLayout = 'grid';
 let activeModalSpecialist = null;
 
-// User Interactive Calendar for Specialist Dashboard
 let myBusyDates = ["2026-08-01", "2026-08-02", "2026-08-05", "2026-08-15", "2026-08-16"];
 
 async function initApp() {
@@ -346,7 +345,8 @@ async function initApp() {
   populateDepartmentFilters();
   applyFilters();
   renderInteractiveSpecCalendar();
-  renderEmployerDashboard();
+  renderProducerDashboard();
+  renderSpecialistDashboard();
   if (window.lucide) window.lucide.createIcons();
 }
 
@@ -668,7 +668,7 @@ function renderModalCalendar(busyDates) {
 }
 
 // -------------------------------------------------------------
-// SPECIALIST INTERACTIVE DASHBOARD CALENDAR
+// SPECIALIST DASHBOARD & CALENDAR LOGIC
 // -------------------------------------------------------------
 function renderInteractiveSpecCalendar() {
   const grid = document.getElementById('interactive-spec-calendar');
@@ -706,6 +706,43 @@ function toggleMyDateAvailability(dateStr) {
   showToast('График занятости обновлен!');
 }
 
+function openEditProfileModal() {
+  const modal = document.getElementById('edit-profile-modal');
+  if (!modal) return;
+  const spec = specialistsData.find(s => s.id === 'spec-1') || specialistsData[0];
+  if (spec) {
+    const nameEl = document.getElementById('my-spec-name');
+    const cityEl = document.getElementById('my-spec-city');
+    const rateEl = document.getElementById('my-spec-rate');
+    const expEl = document.getElementById('my-spec-exp');
+    const tfpEl = document.getElementById('my-spec-tfp');
+    const tagsEl = document.getElementById('my-spec-tags');
+    const showreelEl = document.getElementById('my-spec-showreel');
+    const bioEl = document.getElementById('my-spec-bio');
+
+    if (nameEl) nameEl.value = spec.name;
+    if (cityEl) cityEl.value = spec.city;
+    if (rateEl) rateEl.value = spec.shiftRate;
+    if (expEl) expEl.value = spec.yearsOfExperience;
+    if (tfpEl) tfpEl.checked = spec.isOpenToCreative;
+    if (tagsEl) tagsEl.value = spec.equipmentTags.join(', ');
+    if (showreelEl) showreelEl.value = spec.showreelUrl || '';
+    if (bioEl) bioEl.value = spec.bio;
+  }
+  modal.classList.remove('hidden');
+}
+
+function closeEditProfileModal() {
+  const modal = document.getElementById('edit-profile-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function saveSpecialistProfileFromModal(e) {
+  e.preventDefault();
+  saveSpecialistProfile();
+  closeEditProfileModal();
+}
+
 function saveSpecialistProfile() {
   const spec = specialistsData.find(s => s.id === 'spec-1') || specialistsData[0];
   if (spec) {
@@ -728,7 +765,28 @@ function saveSpecialistProfile() {
     if (bioEl && bioEl.value) spec.bio = bioEl.value.trim();
   }
   applyFilters();
+  renderSpecialistDashboard();
   showToast('Профиль соискателя успешно сохранен!');
+}
+
+function switchSpecDashboardTab(tab) {
+  ['invitations', 'recommendations', 'calendar'].forEach(t => {
+    const tabEl = document.getElementById(`spec-tab-${t}`);
+    const btnEl = document.getElementById(`spec-tab-btn-${t}`);
+    if (tabEl) tabEl.classList.add('hidden');
+    if (btnEl) {
+      btnEl.classList.remove('bg-cyan-500/10', 'text-cyan-400', 'border-cyan-500/30', 'font-bold');
+      btnEl.classList.add('text-zinc-400', 'font-medium');
+    }
+  });
+
+  const activeTab = document.getElementById(`spec-tab-${tab}`);
+  const activeBtn = document.getElementById(`spec-tab-btn-${tab}`);
+  if (activeTab) activeTab.classList.remove('hidden');
+  if (activeBtn) {
+    activeBtn.classList.add('bg-cyan-500/10', 'text-cyan-400', 'border-cyan-500/30', 'font-bold');
+    activeBtn.classList.remove('text-zinc-400', 'font-medium');
+  }
 }
 
 function setCatalogLayout(layout) {
@@ -798,6 +856,9 @@ function switchNav(nav) {
     activeMobBtn.classList.add('text-cyan-400', 'font-bold');
     activeMobBtn.classList.remove('text-zinc-400', 'font-medium');
   }
+
+  if (nav === 'dashboard-spec') renderSpecialistDashboard();
+  if (nav === 'dashboard-prod') renderProducerDashboard();
 }
 
 function resetFilters() {
@@ -831,21 +892,21 @@ function resetFilters() {
   onDepartmentChange();
 }
 
-// Employer Roles Selection Panel Logic & Projects Data
+// -------------------------------------------------------------
+// PRODUCER & SPECIALIST DASHBOARD DATA MODELS & RENDERERS
+// -------------------------------------------------------------
 let selectedProjectRoles = ["Гафер (Gaffer)", "Фокус-пуллер (1st AC)"];
 
-let employerProjects = [
+let producerProjectsList = [
   {
     id: 'proj-1',
     title: 'Фильм «Темная глубина»',
     dates: '12.08 - 15.08.2026',
     statusText: 'В работе',
     statusClass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    desc: 'Мосфильм. Бюджет смены: 50 000 ₽ / чел.',
-    specialistName: 'Александр В.',
-    roleName: 'Гафер',
-    bookingStatus: 'Подтверждено',
-    bookingStatusClass: 'bg-emerald-500/20 text-emerald-400'
+    desc: 'Мосфильм. Бюджет смены: 50 000 ₽ / чел. Требуются Гафер, DOP, 1st AC.',
+    budget: 50000,
+    rolesNeeded: ['Гафер (Gaffer)', 'Оператор-постановщик (DOP)', 'Фокус-пуллер (1st AC)']
   },
   {
     id: 'proj-2',
@@ -853,32 +914,273 @@ let employerProjects = [
     dates: '20.08.2026',
     statusText: 'Сбор смены',
     statusClass: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-    desc: 'Крокус Сити. Нужен FOH (Midas M32).',
-    specialistName: 'Елена М.',
-    roleName: 'Звукорежиссер',
-    bookingStatus: 'В ожидании',
-    bookingStatusClass: 'bg-amber-500/20 text-amber-400'
+    desc: 'Крокус Сити. Нужен FOH (Midas M32) и Светодизайнер.',
+    budget: 45000,
+    rolesNeeded: ['Звукорежиссер FOH (Front of House)', 'Художник по свету (Lighting Designer)', 'Гафер (Gaffer)']
   }
 ];
 
-function renderEmployerDashboard() {
-  const container = document.getElementById('employer-projects-list');
-  if (!container) return;
+let bookingsList = [
+  {
+    id: 'book-1',
+    projectId: 'proj-1',
+    projectTitle: 'Фильм «Темная глубина»',
+    specialistId: 'spec-1',
+    specialistName: 'Александр Волков',
+    roleName: 'Гафер (Gaffer)',
+    dates: '12.08 - 15.08.2026',
+    rate: 45000,
+    status: 'accepted',
+    statusText: 'Подтверждено',
+    statusClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+  },
+  {
+    id: 'book-2',
+    projectId: 'proj-2',
+    projectTitle: 'Клип «Skyline Echoes»',
+    specialistId: 'spec-1',
+    specialistName: 'Александр Волков',
+    roleName: 'Художник по свету (Lighting Designer)',
+    dates: '20.08.2026',
+    rate: 45000,
+    status: 'pending',
+    statusText: 'В ожидании',
+    statusClass: 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+  },
+  {
+    id: 'book-3',
+    projectId: 'proj-2',
+    projectTitle: 'Клип «Skyline Echoes»',
+    specialistId: 'spec-3',
+    specialistName: 'Елена Морозова',
+    roleName: 'Звукорежиссер FOH',
+    dates: '20.08.2026',
+    rate: 35000,
+    status: 'pending',
+    statusText: 'В ожидании',
+    statusClass: 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+  },
+  {
+    id: 'book-4',
+    projectId: 'proj-1',
+    projectTitle: 'Фильм «Темная глубина»',
+    specialistId: 'spec-4',
+    specialistName: 'Дмитрий Чернов',
+    roleName: 'Фокус-пуллер (1st AC)',
+    dates: '12.08 - 15.08.2026',
+    rate: 28000,
+    status: 'pending',
+    statusText: 'В ожидании',
+    statusClass: 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+  }
+];
 
-  container.innerHTML = employerProjects.map(proj => `
-    <div class="glass-card p-3.5 rounded-2xl space-y-2">
-      <div class="flex items-center justify-between text-[11px]">
-        <span class="font-mono text-[9px] px-2 py-0.5 rounded ${proj.statusClass} border font-bold">${proj.statusText}</span>
-        <span class="text-zinc-400 font-mono text-[10px]">${proj.dates}</span>
-      </div>
-      <h4 class="font-bold text-white text-xs sm:text-sm">${proj.title}</h4>
-      <p class="text-[11px] text-zinc-400 line-clamp-2">${proj.desc}</p>
-      <div class="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px]">
-        <span class="text-zinc-400 truncate">${proj.roleName}: <strong class="text-emerald-400">${proj.specialistName}</strong></span>
-        <span class="px-2 py-0.5 rounded ${proj.bookingStatusClass} font-bold shrink-0">${proj.bookingStatus}</span>
-      </div>
-    </div>
-  `).join('');
+function renderProducerDashboard() {
+  const projContainer = document.getElementById('producer-projects-list');
+  const bookContainer = document.getElementById('producer-bookings-list');
+  const projCount = document.getElementById('producer-projects-count');
+  const bookCount = document.getElementById('producer-bookings-count');
+
+  if (projCount) projCount.textContent = `${producerProjectsList.length} проектов`;
+  if (bookCount) bookCount.textContent = `${bookingsList.length} броней`;
+
+  if (projContainer) {
+    if (producerProjectsList.length === 0) {
+      projContainer.innerHTML = `<div class="col-span-2 text-center py-6 text-zinc-500 text-xs">Нет созданных проектов</div>`;
+    } else {
+      projContainer.innerHTML = producerProjectsList.map(proj => `
+        <div class="glass-card p-4 rounded-2xl space-y-2.5">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="font-mono text-[9px] px-2 py-0.5 rounded ${proj.statusClass} border font-bold">${proj.statusText}</span>
+            <span class="text-zinc-400 font-mono text-[10px]">${proj.dates}</span>
+          </div>
+          <h4 class="font-bold text-white text-xs sm:text-sm">${proj.title}</h4>
+          <p class="text-[11px] text-zinc-400 line-clamp-2">${proj.desc}</p>
+          <div class="pt-2 border-t border-zinc-800/80 flex flex-wrap items-center gap-1">
+            <span class="text-[9px] uppercase text-zinc-500 font-mono">Ищем:</span>
+            ${proj.rolesNeeded.map(r => `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">${r}</span>`).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  if (bookContainer) {
+    if (bookingsList.length === 0) {
+      bookContainer.innerHTML = `<div class="col-span-2 text-center py-6 text-zinc-500 text-xs">Нет отправленных бронирований</div>`;
+    } else {
+      bookContainer.innerHTML = bookingsList.map(b => {
+        let badgeClass = 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+        if (b.status === 'accepted') badgeClass = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+        if (b.status === 'rejected') badgeClass = 'bg-rose-500/20 text-rose-400 border-rose-500/30';
+
+        return `
+          <div class="glass-card p-3.5 rounded-2xl space-y-2">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="font-semibold text-cyan-400 truncate">${b.projectTitle}</span>
+              <span class="px-2 py-0.5 rounded ${badgeClass} text-[10px] font-bold shrink-0 border">${b.statusText}</span>
+            </div>
+            <div class="text-xs text-white font-bold flex items-center justify-between">
+              <span>${b.specialistName}</span>
+              <span class="font-mono text-zinc-300 text-[11px]">${b.rate.toLocaleString('ru-RU')} ₽</span>
+            </div>
+            <div class="text-[10px] text-zinc-400 flex items-center justify-between pt-1 border-t border-zinc-800/60">
+              <span>Специальность: <strong class="text-zinc-200">${b.roleName}</strong></span>
+              <span class="font-mono text-zinc-500">${b.dates}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function renderSpecialistDashboard() {
+  const currentSpec = specialistsData.find(s => s.id === 'spec-1') || specialistsData[0];
+  if (!currentSpec) return;
+
+  const nameEl = document.getElementById('my-spec-header-name');
+  const roleEl = document.getElementById('my-spec-header-role');
+  const rateEl = document.getElementById('my-spec-header-rate');
+  const cityEl = document.getElementById('my-spec-header-city');
+  const expEl = document.getElementById('my-spec-header-exp');
+  const avatarEl = document.getElementById('my-spec-avatar');
+
+  if (avatarEl) avatarEl.src = currentSpec.avatar;
+  if (nameEl) nameEl.innerHTML = `<span>${currentSpec.name}</span><span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold shrink-0">Специалист</span>`;
+  if (roleEl) roleEl.textContent = `${currentSpec.primaryDepartment} • ${currentSpec.subcategories.join(' / ')}`;
+  if (rateEl) rateEl.textContent = `${currentSpec.shiftRate.toLocaleString('ru-RU')} ₽ / смена`;
+  if (cityEl) cityEl.textContent = `📍 ${currentSpec.city}`;
+  if (expEl) expEl.textContent = `⏱️ Опыт ${currentSpec.yearsOfExperience} лет`;
+
+  const specInvitations = bookingsList.filter(b => b.specialistId === 'spec-1' || b.specialistName === currentSpec.name);
+  const invContainer = document.getElementById('spec-invitations-list');
+  const invCount = document.getElementById('spec-invitations-count');
+
+  if (invCount) invCount.textContent = specInvitations.length;
+
+  if (invContainer) {
+    if (specInvitations.length === 0) {
+      invContainer.innerHTML = `<div class="col-span-2 text-center py-6 text-zinc-500 text-xs">У вас пока нет новых вызовов на съемки</div>`;
+    } else {
+      invContainer.innerHTML = specInvitations.map(inv => {
+        let badgeClass = 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+        if (inv.status === 'accepted') badgeClass = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+        if (inv.status === 'rejected') badgeClass = 'bg-rose-500/20 text-rose-400 border-rose-500/30';
+
+        const isPending = inv.status === 'pending';
+
+        return `
+          <div class="glass-card p-4 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="font-mono text-[9px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold">Вызов на съемку</span>
+              <span class="px-2 py-0.5 rounded ${badgeClass} text-[10px] font-bold border">${inv.statusText}</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-white text-sm">${inv.projectTitle}</h4>
+              <p class="text-xs text-cyan-300 font-medium mt-0.5">${inv.roleName}</p>
+              <div class="text-[11px] text-zinc-400 mt-1 flex items-center justify-between font-mono">
+                <span>Даты: ${inv.dates}</span>
+                <span class="text-white font-bold">${inv.rate.toLocaleString('ru-RU')} ₽ / смена</span>
+              </div>
+            </div>
+            ${isPending ? `
+              <div class="pt-2 border-t border-zinc-800 flex items-center gap-2">
+                <button onclick="respondToInvitation('${inv.id}', 'accepted')" class="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-black font-bold text-xs rounded-xl transition-all shadow-md">
+                  ✓ Принять
+                </button>
+                <button onclick="respondToInvitation('${inv.id}', 'rejected')" class="flex-1 py-1.5 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white font-bold text-xs rounded-xl transition-all border border-rose-500/30">
+                  ✕ Отклонить
+                </button>
+              </div>
+            ` : `
+              <div class="pt-2 border-t border-zinc-800 text-[11px] text-zinc-400 text-center">
+                Ваш статус: <strong class="text-white">${inv.statusText}</strong>
+              </div>
+            `}
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  const specRoles = currentSpec.subcategories;
+  const recommended = producerProjectsList.filter(proj => {
+    const roleMatch = proj.rolesNeeded.some(r => specRoles.some(s => r.toLowerCase().includes(s.toLowerCase()) || s.toLowerCase().includes(r.toLowerCase())));
+    const budgetMatch = proj.budget >= currentSpec.shiftRate;
+    return roleMatch || budgetMatch;
+  });
+
+  const recContainer = document.getElementById('spec-recommendations-list');
+  if (recContainer) {
+    if (recommended.length === 0) {
+      recContainer.innerHTML = `<div class="col-span-2 text-center py-6 text-zinc-500 text-xs">Подходящих вакансий пока не найдено</div>`;
+    } else {
+      recContainer.innerHTML = recommended.map(proj => {
+        const alreadyApplied = bookingsList.some(b => b.projectId === proj.id && (b.specialistId === 'spec-1' || b.specialistName === currentSpec.name));
+        return `
+          <div class="glass-card p-4 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="font-mono text-[9px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold">🎯 Вакансия подходит</span>
+              <span class="text-zinc-400 font-mono text-[10px]">${proj.dates}</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-white text-sm">${proj.title}</h4>
+              <p class="text-xs text-zinc-400 mt-0.5 line-clamp-2">${proj.desc}</p>
+            </div>
+            <div class="flex items-center justify-between text-[11px] pt-1">
+              <span class="text-cyan-400 font-mono font-bold">${proj.budget.toLocaleString('ru-RU')} ₽ / смена</span>
+              <span class="text-zinc-400 text-[10px]">Роль: ${proj.rolesNeeded[0] || 'Специалист'}</span>
+            </div>
+            <div class="pt-2 border-t border-zinc-800">
+              <button onclick="applyToJob('${proj.id}')" ${alreadyApplied ? 'disabled' : ''} class="w-full py-1.5 ${alreadyApplied ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' : 'bg-cyan-600 hover:bg-cyan-500 text-black font-bold'} text-xs rounded-xl transition-all shadow-md">
+                ${alreadyApplied ? 'Отклик отправлен' : 'Откликнуться на вакансию'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function respondToInvitation(bookingId, newStatus) {
+  const booking = bookingsList.find(b => b.id === bookingId);
+  if (booking) {
+    booking.status = newStatus;
+    booking.statusText = newStatus === 'accepted' ? 'Подтверждено' : 'Отклонено';
+    booking.statusClass = newStatus === 'accepted' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border-rose-500/30';
+    renderSpecialistDashboard();
+    renderProducerDashboard();
+    showToast(newStatus === 'accepted' ? 'Вы приняли приглашение на съемку!' : 'Вы отклонили приглашение.');
+  }
+}
+
+function applyToJob(projectId) {
+  const proj = producerProjectsList.find(p => p.id === projectId);
+  const spec = specialistsData.find(s => s.id === 'spec-1') || specialistsData[0];
+  if (proj && spec) {
+    bookingsList.unshift({
+      id: `book-${Date.now()}`,
+      projectId: proj.id,
+      projectTitle: proj.title,
+      specialistId: spec.id,
+      specialistName: spec.name,
+      roleName: spec.subcategories[0] || 'Специалист',
+      dates: proj.dates,
+      rate: spec.shiftRate,
+      status: 'pending',
+      statusText: 'В ожидании',
+      statusClass: 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+    });
+    renderSpecialistDashboard();
+    renderProducerDashboard();
+    showToast(`Отклик на проект «${proj.title}» отправлен продюсеру!`);
+  }
 }
 
 function openCreateProjectModal() {
@@ -910,17 +1212,7 @@ function toggleRolesListSection() {
 
 function getActiveDepartmentsList() {
   if (departmentsData && departmentsData.length > 0) return departmentsData;
-  return [
-    {"name":"1. Операторский цех и Камера","professions":["Оператор-постановщик (DOP)","Оператор / Камерамен","Второй оператор","Фокус-пуллер (1st AC)","Камера-механик (2nd AC)","Стедикамист","Оператор крана / коптера","DIT (Digital Imaging Technician)","Видеоинженер / Плейбэкер"]},
-    {"name":"2. Цех Света (Светотехника)","professions":["Художник по свету (Lighting Designer)","Гафер (Gaffer)","Оператор светового пульта","Системный инженер (Art-Net / DMX / Сети)","Осветитель (Lighting Technician)","Бестбой (Best Boy Electric)","Художник превизуализации"]},
-    {"name":"3. Цех Звука","professions":["Звукорежиссер на площадке / Саунд-дизайнер","Звукорежиссер FOH (Front of House)","Мониторный звукорежиссер","Бум-оператор (Микрофонщик)","Системный инженер (Звук)","RF-менеджер (Радиочастоты)","Техник по звуку"]},
-    {"name":"4. Продюсерский цех","professions":["Генеральный / Исполнительный продюсер","Креативный продюсер","Линейный продюсер","Шоу-раннер","Директор картины / площадки (UPM)","Локейшен-менеджер (Location Manager)","Администратор площадки"]},
-    {"name":"5. Режиссерский цех","professions":["Режиссер-постановщик","Второй режиссер (1st AD - планирование)","Второй режиссер (2nd AD - площадка)","Помощник режиссер (Скрипт-супервайзер)","Кастинг-директор","Ассистент по актерам","Бригадир АМС (Массовка)","Хлопушка"]},
-    {"name":"6. Художественный цех (Art Department)","professions":["Художник-постановщик","Арт-директор","Декоратор","Постановщик","Художник по реквизиту / Реквизитор","Бутафор"]},
-    {"name":"7. Костюм и Грим","professions":["Художник по костюмам","Ассистент по костюмам / Костюмер","Художник по гриму / Главный гример","Гример-визажист","Мастер по спецэффектам (SFX Makeup)"]},
-    {"name":"8. Сценический комплекс и Механика (Грип / Риггинг)","professions":["Долли-грип (Кран / Тележка)","Кей-грип (Key Grip)","Машинист сцены / Стейджхэнд","Риггер (Высотные работы / Подвесы)"]},
-    {"name":"9. Пост-продакшен (Монтаж и VFX)","professions":["Режиссер монтажа","Колорист","VFX-супервайзер","CG-Artist / Моушн-дизайнер","Звукорежиссер пост-продакшена"]}
-  ];
+  return DEFAULT_DEPARTMENTS_DATA;
 }
 
 function renderRolesDropdownTree(searchQuery = '') {
@@ -1023,11 +1315,11 @@ function submitNewProject(e) {
   const dateInput = document.getElementById('project-start-date');
 
   const name = nameInput ? nameInput.value.trim() : 'Съемочный проект';
-  const budget = budgetInput ? budgetInput.value : '45000';
+  const budget = budgetInput ? Number(budgetInput.value) || 45000 : 45000;
   const desc = descInput ? descInput.value.trim() : 'Павильонные съемки';
-  const startDate = dateInput && dateInput.value ? dateInput.value.split('-').reverse().join('.') : 'Скоро';
+  const startDate = dateInput && dateInput.value ? dateInput.value.split('-').reverse().join('.') : 'Август 2026';
 
-  employerProjects.unshift({
+  const newProj = {
     id: `proj-${Date.now()}`,
     title: name,
     dates: startDate,
