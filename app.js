@@ -1325,14 +1325,14 @@ function submitNewProject(e) {
     dates: startDate,
     statusText: 'Сбор смены',
     statusClass: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-    desc: `${desc || 'Описание не указано'}. Бюджет: ${Number(budget).toLocaleString('ru-RU')} ₽`,
-    specialistName: selectedProjectRoles.length > 0 ? selectedProjectRoles[0] : 'Специалист',
-    roleName: 'Поиск',
-    bookingStatus: 'В ожидании',
-    bookingStatusClass: 'bg-amber-500/20 text-amber-400'
-  });
+    desc: desc || 'Описание съемок не указано.',
+    budget: budget,
+    rolesNeeded: selectedProjectRoles.length > 0 ? [...selectedProjectRoles] : ['Специалист']
+  };
 
-  renderEmployerDashboard();
+  producerProjectsList.unshift(newProj);
+  renderProducerDashboard();
+  renderSpecialistDashboard();
   closeCreateProjectModal();
   switchNav('dashboard-prod');
   showToast(`Проект «${name}» опубликован! Вы можете забронировать специалистов.`);
@@ -1342,21 +1342,27 @@ function bookingRequestAction() {
   closeSpecialistModal();
   if (activeModalSpecialist) {
     const mainRole = activeModalSpecialist.subcategories[0] || 'Специалист';
-    employerProjects.unshift({
-      id: `proj-${Date.now()}`,
-      title: `Съемка с ${activeModalSpecialist.name}`,
-      dates: 'Август 2026',
-      statusText: 'Вызов на съемку',
-      statusClass: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-      desc: `Приглашение для ${activeModalSpecialist.name} (${mainRole}). Ставка: ${activeModalSpecialist.shiftRate.toLocaleString('ru-RU')} ₽.`,
+    bookingsList.unshift({
+      id: `book-${Date.now()}`,
+      projectId: producerProjectsList[0] ? producerProjectsList[0].id : 'proj-1',
+      projectTitle: producerProjectsList[0] ? producerProjectsList[0].title : 'Съемочный проект',
+      specialistId: activeModalSpecialist.id,
       specialistName: activeModalSpecialist.name,
       roleName: mainRole,
-      bookingStatus: 'В ожидании',
-      bookingStatusClass: 'bg-amber-500/20 text-amber-400'
+      dates: 'Август 2026',
+      rate: activeModalSpecialist.shiftRate,
+      status: 'pending',
+      statusText: 'В ожидании',
+      statusClass: 'bg-amber-500/20 text-amber-400 border-amber-500/30'
     });
-    renderEmployerDashboard();
+    renderProducerDashboard();
+    renderSpecialistDashboard();
     showToast(`Приглашение на съемку отправлено специалисту ${activeModalSpecialist.name}! Заявка отображается в Кабинете Нанимателя.`);
   }
+}
+
+function renderEmployerDashboard() {
+  renderProducerDashboard();
 }
 
 function showToast(msg) {
@@ -1368,5 +1374,6 @@ function showToast(msg) {
     toast.classList.add('hidden');
   }, 3500);
 }
+
 
 
