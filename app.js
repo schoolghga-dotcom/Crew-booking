@@ -155,59 +155,58 @@ function renderGridCards(list) {
   container.innerHTML = list.map(spec => {
     const mainProf = spec.subcategories[0] || spec.primaryDepartment;
     const tfpBadge = spec.isOpenToCreative 
-      ? `<span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-           🎨 Готов к творчеству
+      ? `<span class="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+           🎨 Готов к TFP
          </span>`
       : '';
 
-    const tagsHtml = spec.equipmentTags.slice(0, 4).map(t => 
-      `<span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-zinc-850 text-zinc-300 border border-zinc-700/60">${t}</span>`
+    const tagsHtml = spec.equipmentTags.slice(0, 3).map(t => 
+      `<span class="text-[9px] sm:text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-zinc-850 text-zinc-300 border border-zinc-700/60 truncate max-w-[120px]">${t}</span>`
     ).join('');
 
     return `
-      <div class="glass-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3 transition-all hover:scale-[1.01]">
+      <div class="glass-card rounded-2xl p-3.5 sm:p-4 flex flex-col justify-between space-y-3 transition-all min-w-0">
         <div>
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <img src="${spec.avatar}" alt="${spec.name}" class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl object-cover border border-zinc-700">
-              <div>
-                <h3 class="font-bold text-sm text-white flex items-center gap-1.5">
-                  ${spec.name}
-                  <span class="flex items-center text-[11px] font-semibold text-amber-400">
-                    ★ ${spec.rating}
-                  </span>
+          <div class="flex items-start justify-between gap-2.5">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <img src="${spec.avatar}" alt="${spec.name}" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-cover border border-zinc-700 shrink-0">
+              <div class="min-w-0">
+                <h3 class="font-bold text-xs sm:text-sm text-white flex items-center gap-1">
+                  <span class="truncate">${spec.name}</span>
+                  <span class="text-[10px] font-semibold text-amber-400 shrink-0">★ ${spec.rating}</span>
                 </h3>
-                <span class="text-xs text-zinc-400 font-medium block">${mainProf}</span>
-                <span class="text-[10px] text-zinc-500 block">${spec.city} • Опыт ${spec.yearsOfExperience} лет</span>
+                <span class="text-[11px] text-zinc-400 font-medium block truncate">${mainProf}</span>
+                <span class="text-[9px] text-zinc-500 block truncate">${spec.city} • Опыт ${spec.yearsOfExperience} лет</span>
               </div>
             </div>
           </div>
 
-          <div class="mt-2.5 flex flex-wrap items-center gap-1.5">
+          <div class="mt-2 flex flex-wrap items-center gap-1">
             ${tfpBadge}
           </div>
 
-          <div class="mt-2.5 flex flex-wrap gap-1">
+          <div class="mt-2 flex flex-wrap gap-1">
             ${tagsHtml}
           </div>
         </div>
 
-        <div class="pt-3 border-t border-zinc-800/80 flex items-center justify-between">
+        <div class="pt-2.5 border-t border-zinc-800/80 flex items-center justify-between">
           <div>
-            <span class="text-[9px] uppercase text-zinc-400 font-mono">Смена</span>
-            <div class="text-sm font-extrabold text-white font-mono">
+            <span class="text-[8px] uppercase text-zinc-400 font-mono block">Смена</span>
+            <div class="text-xs sm:text-sm font-extrabold text-white font-mono">
               ${spec.shiftRate.toLocaleString('ru-RU')} ₽
             </div>
           </div>
 
-          <button onclick="openSpecialistModal('${spec.id}')" class="px-3 py-1.5 bg-zinc-800 hover:bg-cyan-600 hover:text-black text-white font-semibold text-xs rounded-xl transition-all border border-zinc-700/80 flex items-center gap-1 touch-bounce">
-            Профиль <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+          <button onclick="openSpecialistModal('${spec.id}')" class="px-2.5 py-1.5 bg-zinc-800 hover:bg-cyan-600 hover:text-black text-white font-semibold text-[11px] rounded-xl transition-all border border-zinc-700/80 flex items-center gap-1 touch-bounce">
+            Профиль <i data-lucide="chevron-right" class="w-3 h-3"></i>
           </button>
         </div>
       </div>
     `;
   }).join('');
 }
+
 
 function renderTableRows(list) {
   const tbody = document.getElementById('catalog-table-body');

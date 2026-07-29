@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="ru" class="dark h-full bg-zinc-950 text-zinc-100">
+<html lang="ru" class="dark h-full bg-zinc-950 text-zinc-100 overflow-x-hidden">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Crew Booking — Платформа подбора и бронирования кино- и технического персонала</title>
   <meta name="description" content="Платформа для подбора квалифицированного технического персонала, кинооператоров, гаферов, звукорежиссеров и риггеров на съемочные и ивент-площадки.">
   
-  <!-- Tailwind CSS CDN & Fonts -->
+  <!-- Tailwind CSS CDN & Custom Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -39,43 +39,71 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       -webkit-tap-highlight-color: transparent;
+      text-size-adjust: 100%;
     }
     code, pre, .font-mono { font-family: 'JetBrains Mono', monospace; }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: #09090b; }
     ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+    
     .glass-card {
-      background: rgba(24, 24, 28, 0.75);
+      background: rgba(24, 24, 28, 0.8);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    /* Strict Text Truncation and Mobile Wrapping Guards */
+    .line-clamp-1 {
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .break-word-custom {
+      overflow-wrap: break-word;
+      word-break: break-word;
+      hyphens: auto;
     }
     .touch-bounce:active { transform: scale(0.97); }
+    
+    /* Safe Area Padding for Modern Mobile Browsers */
+    .pb-safe-nav {
+      padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+    }
   </style>
 </head>
-<body class="bg-zinc-950 text-zinc-100 min-h-full flex flex-col antialiased selection:bg-cyan-500 selection:text-black pb-20 lg:pb-0">
+<body class="bg-zinc-950 text-zinc-100 min-h-full flex flex-col antialiased selection:bg-cyan-500 selection:text-black pb-safe-nav lg:pb-0 w-full overflow-x-hidden">
 
-  <!-- Header / Navigation Bar -->
-  <header class="sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800/80 px-4 h-14 sm:h-16 flex items-center justify-between">
+  <!-- Header Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800/80 px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between w-full">
     
     <!-- Brand Logo -->
-    <div class="flex items-center gap-2.5 cursor-pointer" onclick="resetFilters(); switchNav('catalog');">
+    <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="resetFilters(); switchNav('catalog');">
       <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-emerald-500 to-indigo-600 p-[1.5px] shadow-lg shadow-cyan-950/40">
         <div class="w-full h-full bg-zinc-950 rounded-[9px] flex items-center justify-center">
           <i data-lucide="clapperboard" class="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400"></i>
         </div>
       </div>
-      <div>
-        <span class="font-extrabold text-base sm:text-lg tracking-tight text-white flex items-center gap-1">
+      <div class="leading-tight">
+        <span class="font-extrabold text-sm sm:text-lg tracking-tight text-white flex items-center gap-1">
           CREW <span class="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">BOOKING</span>
         </span>
         <span class="hidden sm:block text-[9px] uppercase tracking-widest text-zinc-400 font-medium">Production Technical Hub</span>
       </div>
     </div>
 
-    <!-- Central Nav (Desktop) -->
+    <!-- Desktop Navigation Tabs -->
     <nav class="hidden md:flex items-center gap-1 bg-zinc-900/90 p-1 rounded-xl border border-zinc-800">
       <button id="nav-catalog" onclick="switchNav('catalog')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800 text-white shadow-sm flex items-center gap-2">
         <i data-lucide="users" class="w-4 h-4 text-cyan-400"></i> Специалисты
@@ -88,42 +116,41 @@
       </button>
     </nav>
 
-    <!-- Header Actions -->
-    <div class="flex items-center gap-2">
+    <!-- Header Right Actions -->
+    <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
       <!-- Mobile Filter Drawer Toggle Button -->
-      <button onclick="toggleMobileFilters()" class="lg:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 border border-cyan-500/40 text-cyan-400 font-semibold text-xs touch-bounce">
-        <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> Фильтры
+      <button onclick="toggleMobileFilters()" class="lg:hidden flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-zinc-900 border border-cyan-500/40 text-cyan-400 font-semibold text-[11px] touch-bounce">
+        <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> <span>Фильтры</span>
       </button>
 
-      <!-- Account Role Switcher Badge -->
-      <div class="relative group">
-        <button onclick="openAuthModal()" class="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-1.5 text-xs text-zinc-200 hover:text-white transition-all">
-          <div id="user-avatar-badge" class="w-6 h-6 rounded-full bg-cyan-600/30 text-cyan-400 font-bold flex items-center justify-center text-[10px]">АВ</div>
-          <span id="user-role-label" class="hidden sm:inline font-medium">Александр (Гафер)</span>
-          <i data-lucide="user-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+      <!-- Account Badge -->
+      <div class="relative">
+        <button class="flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 rounded-xl px-2.5 py-1.5 text-xs text-zinc-200 hover:text-white transition-all">
+          <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-cyan-600/30 text-cyan-400 font-bold flex items-center justify-center text-[10px] shrink-0">АВ</div>
+          <span class="hidden sm:inline font-medium max-w-[100px] truncate">Александр</span>
         </button>
       </div>
     </div>
 
   </header>
 
-  <!-- Main Workspace Container -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-6 overflow-x-hidden">
 
     <!-- 1. CATALOG PUBLIC VIEW -->
-    <div id="view-catalog" class="space-y-4 sm:space-y-6">
+    <div id="view-catalog" class="space-y-3 sm:space-y-6">
       
       <!-- Top Search Summary -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-3.5 sm:p-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-3 sm:p-4">
         <div>
-          <h1 class="text-base sm:text-xl font-bold text-white flex items-center justify-between sm:justify-start gap-2">
-            <span>База съемочного персонала</span>
-            <span id="results-count" class="text-[11px] sm:text-xs bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-semibold px-2.5 py-0.5 rounded-full">6 спец.</span>
+          <h1 class="text-sm sm:text-xl font-bold text-white flex items-center justify-between sm:justify-start gap-2">
+            <span>База персонала</span>
+            <span id="results-count" class="text-[10px] sm:text-xs bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-semibold px-2 py-0.5 rounded-full shrink-0">6 спец.</span>
           </h1>
-          <p class="text-[11px] sm:text-xs text-zinc-400 mt-0.5">Фильтрация по оборудованию (grandMA2, Midas M32, Accsoon), цехам и датам.</p>
+          <p class="text-[10px] sm:text-xs text-zinc-400 mt-0.5 line-clamp-1">Фильтрация по оборудованию (grandMA2, Midas M32, Accsoon), цехам и датам.</p>
         </div>
 
-        <div class="flex items-center justify-between sm:justify-end gap-2 border-t sm:border-t-0 border-zinc-800/80 pt-2.5 sm:pt-0">
+        <div class="flex items-center justify-between sm:justify-end gap-2 border-t sm:border-t-0 border-zinc-800/80 pt-2 sm:pt-0">
           <div class="flex items-center bg-zinc-950 p-1 rounded-xl border border-zinc-800">
             <button id="btn-view-grid" onclick="setCatalogLayout('grid')" class="p-1.5 rounded-lg text-zinc-200 bg-zinc-800 transition-all touch-bounce">
               <i data-lucide="layout-grid" class="w-4 h-4"></i>
@@ -133,19 +160,19 @@
             </button>
           </div>
 
-          <button onclick="resetFilters()" class="px-3 py-1.5 rounded-xl border border-zinc-800 text-xs font-medium text-zinc-400 hover:text-white transition-all flex items-center gap-1">
-            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Сброс
+          <button onclick="resetFilters()" class="px-2.5 py-1.5 rounded-xl border border-zinc-800 text-[11px] sm:text-xs font-medium text-zinc-400 hover:text-white transition-all flex items-center gap-1">
+            <i data-lucide="rotate-ccw" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i> Сбросить
           </button>
         </div>
       </div>
 
       <!-- Catalog Main Grid & Sidebar -->
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
 
-        <!-- Sidebar Filters -->
-        <aside id="mobile-filter-drawer" class="fixed inset-x-0 bottom-0 top-14 z-40 bg-zinc-950/95 backdrop-blur-xl p-5 overflow-y-auto hidden lg:static lg:block lg:z-auto lg:bg-zinc-900/70 lg:border lg:border-zinc-800/80 lg:rounded-2xl lg:h-fit lg:sticky lg:top-20 space-y-4">
-          <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
-            <h2 class="font-bold text-sm text-white flex items-center gap-2">
+        <!-- Mobile Filter Drawer -->
+        <aside id="mobile-filter-drawer" class="fixed inset-x-0 bottom-0 top-14 z-40 bg-zinc-950/95 backdrop-blur-xl p-4 sm:p-5 overflow-y-auto hidden lg:static lg:block lg:z-auto lg:bg-zinc-900/70 lg:border lg:border-zinc-800/80 lg:rounded-2xl lg:h-fit lg:sticky lg:top-20 space-y-3.5">
+          <div class="flex items-center justify-between border-b border-zinc-800 pb-2.5">
+            <h2 class="font-bold text-xs sm:text-sm text-white flex items-center gap-2">
               <i data-lucide="sliders-horizontal" class="w-4 h-4 text-cyan-400"></i> Фильтры поиска
             </h2>
             <button onclick="toggleMobileFilters()" class="lg:hidden text-zinc-400 p-1">
@@ -154,29 +181,29 @@
           </div>
 
           <div class="space-y-1">
-            <label class="text-xs font-semibold text-zinc-300">Поиск</label>
+            <label class="text-[11px] font-semibold text-zinc-300">Поиск</label>
             <div class="relative">
-              <i data-lucide="search" class="w-4 h-4 text-zinc-400 absolute left-3 top-3"></i>
-              <input type="text" id="filter-search" oninput="applyFilters()" placeholder="Имя, тег (grandMA2)..." class="w-full bg-zinc-900 lg:bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-3"></i>
+              <input type="text" id="filter-search" oninput="applyFilters()" placeholder="Имя, тег (grandMA2)..." class="w-full bg-zinc-900 lg:bg-zinc-950 border border-zinc-800 rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none">
             </div>
           </div>
 
           <div class="space-y-1">
-            <label class="text-xs font-semibold text-zinc-300">Цех / Отдел</label>
-            <select id="filter-department" onchange="onDepartmentChange()" class="w-full bg-zinc-900 lg:bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none">
+            <label class="text-[11px] font-semibold text-zinc-300">Цех / Отдел</label>
+            <select id="filter-department" onchange="onDepartmentChange()" class="w-full bg-zinc-900 lg:bg-zinc-950 border border-zinc-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none truncate">
               <option value="">Все 9 цехов</option>
             </select>
           </div>
 
           <div class="space-y-1">
-            <label class="text-xs font-semibold text-zinc-300">Профессия</label>
-            <select id="filter-profession" onchange="applyFilters()" class="w-full bg-zinc-900 lg:bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none">
+            <label class="text-[11px] font-semibold text-zinc-300">Профессия</label>
+            <select id="filter-profession" onchange="applyFilters()" class="w-full bg-zinc-900 lg:bg-zinc-950 border border-zinc-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none truncate">
               <option value="">Все профессии</option>
             </select>
           </div>
 
-          <div class="space-y-2 pt-1">
-            <div class="flex items-center justify-between text-xs">
+          <div class="space-y-1.5 pt-1">
+            <div class="flex items-center justify-between text-[11px]">
               <label class="font-semibold text-zinc-300">Макс. ставка</label>
               <span id="rate-value-display" class="font-mono font-bold text-cyan-400">100 000 ₽</span>
             </div>
@@ -184,52 +211,52 @@
           </div>
 
           <div class="pt-2 border-t border-zinc-800">
-            <label class="flex items-center gap-2.5 cursor-pointer py-1">
-              <input type="checkbox" id="filter-tfp" onchange="applyFilters()" class="w-4 h-4 rounded bg-zinc-900 border-zinc-700 text-emerald-500 accent-emerald-500">
-              <span class="text-xs font-medium text-zinc-300">🎨 Только готовые к творчеству (TFP)</span>
+            <label class="flex items-center gap-2 cursor-pointer py-1">
+              <input type="checkbox" id="filter-tfp" onchange="applyFilters()" class="w-3.5 h-3.5 rounded bg-zinc-900 border-zinc-700 text-emerald-500 accent-emerald-500 shrink-0">
+              <span class="text-[11px] font-medium text-zinc-300">🎨 Только готовые к TFP</span>
             </label>
           </div>
 
-          <div class="space-y-3 pt-2 border-t border-zinc-800">
-            <div class="flex items-center justify-between text-xs">
+          <div class="space-y-2 pt-2 border-t border-zinc-800">
+            <div class="flex items-center justify-between text-[11px]">
               <label class="font-semibold text-zinc-300">Мин. опыт</label>
               <span id="exp-value-display" class="font-mono text-zinc-400">Любой</span>
             </div>
             <input type="range" id="filter-exp" min="0" max="10" step="1" value="0" oninput="onExpInput(this.value)" class="w-full accent-cyan-500 h-2 bg-zinc-800 rounded-lg cursor-pointer">
             
-            <label class="flex items-center gap-2 cursor-pointer py-1">
-              <input type="checkbox" id="filter-showreel" onchange="applyFilters()" class="w-4 h-4 rounded bg-zinc-900 border-zinc-700 text-cyan-500 accent-cyan-500">
-              <span class="text-xs text-zinc-300 flex items-center gap-1">
-                <i data-lucide="video" class="w-3.5 h-3.5 text-cyan-400"></i> С Шоурилом
+            <label class="flex items-center gap-2 cursor-pointer py-0.5">
+              <input type="checkbox" id="filter-showreel" onchange="applyFilters()" class="w-3.5 h-3.5 rounded bg-zinc-900 border-zinc-700 text-cyan-500 accent-cyan-500 shrink-0">
+              <span class="text-[11px] text-zinc-300 flex items-center gap-1">
+                <i data-lucide="video" class="w-3 h-3 text-cyan-400"></i> С Шоурилом
               </span>
             </label>
           </div>
 
           <div class="space-y-1 pt-2 border-t border-zinc-800">
-            <label class="text-xs font-semibold text-zinc-300">Свободен в дату</label>
-            <input type="date" id="filter-date" onchange="applyFilters()" class="w-full bg-zinc-900 lg:bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-white">
+            <label class="text-[11px] font-semibold text-zinc-300">Свободен в дату</label>
+            <input type="date" id="filter-date" onchange="applyFilters()" class="w-full bg-zinc-900 lg:bg-zinc-950 border border-zinc-800 rounded-xl px-2.5 py-2 text-xs text-white">
           </div>
 
-          <div class="lg:hidden pt-3">
-            <button onclick="toggleMobileFilters()" class="w-full py-3 bg-cyan-600 font-bold text-zinc-950 text-xs rounded-xl shadow-lg">
-              Показать варианты
+          <div class="lg:hidden pt-2">
+            <button onclick="toggleMobileFilters()" class="w-full py-2.5 bg-cyan-600 font-bold text-zinc-950 text-xs rounded-xl shadow-lg">
+              Применить фильтры
             </button>
           </div>
         </aside>
 
-        <!-- Specialists List Area -->
-        <section class="lg:col-span-3">
-          <div id="catalog-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5"></div>
+        <!-- Specialists Cards Area -->
+        <section class="lg:col-span-3 min-w-0">
+          <div id="catalog-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"></div>
           <div id="catalog-list" class="hidden bg-zinc-900/70 border border-zinc-800 rounded-2xl overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs text-zinc-300 min-w-[500px]">
-                <thead class="bg-zinc-950 text-zinc-400 font-semibold border-b border-zinc-800 uppercase text-[10px]">
+            <div class="overflow-x-auto w-full">
+              <table class="w-full text-left text-[11px] sm:text-xs text-zinc-300 min-w-[460px]">
+                <thead class="bg-zinc-950 text-zinc-400 font-semibold border-b border-zinc-800 uppercase text-[9px] sm:text-[10px]">
                   <tr>
-                    <th class="p-3">Специалист</th>
-                    <th class="p-3">Профессия</th>
-                    <th class="p-3">Теги</th>
-                    <th class="p-3">Ставка</th>
-                    <th class="p-3 text-right">Действие</th>
+                    <th class="p-2.5 sm:p-3">Специалист</th>
+                    <th class="p-2.5 sm:p-3">Профессия</th>
+                    <th class="p-2.5 sm:p-3">Теги</th>
+                    <th class="p-2.5 sm:p-3">Ставка</th>
+                    <th class="p-2.5 sm:p-3 text-right">Действие</th>
                   </tr>
                 </thead>
                 <tbody id="catalog-table-body" class="divide-y divide-zinc-800/60"></tbody>
@@ -237,10 +264,10 @@
             </div>
           </div>
 
-          <div id="empty-state" class="hidden text-center py-12 px-4 bg-zinc-900/40 border border-dashed border-zinc-800 rounded-2xl">
-            <i data-lucide="search-x" class="w-8 h-8 text-zinc-500 mx-auto mb-2"></i>
-            <h3 class="text-sm font-bold text-white">Никого не найдено</h3>
-            <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-cyan-600 text-zinc-950 font-semibold text-xs rounded-xl">
+          <div id="empty-state" class="hidden text-center py-10 px-4 bg-zinc-900/40 border border-dashed border-zinc-800 rounded-2xl">
+            <i data-lucide="search-x" class="w-7 h-7 text-zinc-500 mx-auto mb-2"></i>
+            <h3 class="text-xs sm:text-sm font-bold text-white">Никого не найдено</h3>
+            <button onclick="resetFilters()" class="mt-3 px-3.5 py-1.5 bg-cyan-600 text-zinc-950 font-semibold text-xs rounded-xl">
               Сбросить фильтры
             </button>
           </div>
@@ -249,186 +276,154 @@
       </div>
     </div>
 
-    <!-- 2. ЛИЧНЫЙ КАБИНЕТ СОИСКАТЕЛЯ (СПЕЦИАЛИСТА) -->
-    <div id="view-dashboard-spec" class="hidden space-y-6">
-      
-      <div class="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5 sm:p-6 space-y-5">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+    <!-- 2. ЛИЧНЫЙ КАБИНЕТ СОИСКАТЕЛЯ -->
+    <div id="view-dashboard-spec" class="hidden space-y-4 min-w-0">
+      <div class="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800 pb-3">
           <div class="flex items-center gap-3">
-            <img id="my-spec-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" class="w-14 h-14 rounded-2xl object-cover border-2 border-emerald-500">
-            <div>
-              <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                Александр Волков
-                <span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">Профиль соискателя</span>
-              </h2>
-              <p class="text-xs text-zinc-400">Цех Света • Lighting Designer / Гафер</p>
+            <img id="my-spec-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border-2 border-emerald-500 shrink-0">
+            <div class="min-w-0">
+              <h2 class="text-base sm:text-lg font-bold text-white truncate">Александр Волков</h2>
+              <p class="text-[11px] sm:text-xs text-zinc-400 truncate">Цех Света • Lighting Designer / Гафер</p>
             </div>
           </div>
 
-          <button onclick="saveSpecialistProfile()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-zinc-950 font-bold text-xs rounded-xl shadow-lg flex items-center justify-center gap-2 touch-bounce">
+          <button onclick="saveSpecialistProfile()" class="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-zinc-950 font-bold text-xs rounded-xl shadow-lg flex items-center justify-center gap-2 touch-bounce">
             <i data-lucide="save" class="w-4 h-4"></i> Сохранить профиль
           </button>
         </div>
 
-        <form class="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
-          <div class="space-y-4">
+        <form class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div class="space-y-3">
             <div>
-              <label class="block font-semibold text-zinc-300 mb-1">ФИО Специалиста</label>
-              <input type="text" id="my-spec-name" value="Александр Волков" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-white">
+              <label class="block font-semibold text-zinc-300 mb-1">ФИО</label>
+              <input type="text" id="my-spec-name" value="Александр Волков" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-white">
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-2 gap-2">
               <div>
                 <label class="block font-semibold text-zinc-300 mb-1">Город</label>
-                <input type="text" id="my-spec-city" value="Москва" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-white">
+                <input type="text" id="my-spec-city" value="Москва" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-2.5 py-2 text-white">
               </div>
               <div>
-                <label class="block font-semibold text-zinc-300 mb-1">Стаж (в годах)</label>
-                <input type="number" id="my-spec-exp" value="8" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-white font-mono">
+                <label class="block font-semibold text-zinc-300 mb-1">Стаж (лет)</label>
+                <input type="number" id="my-spec-exp" value="8" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-2.5 py-2 text-white font-mono">
               </div>
             </div>
 
-            <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-2xl space-y-3">
-              <h4 class="font-semibold text-cyan-400 flex items-center gap-1.5">
-                <i data-lucide="coins" class="w-4 h-4"></i> Фин. условия и статус
-              </h4>
+            <div class="p-3 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2">
+              <h4 class="font-semibold text-cyan-400 text-xs flex items-center gap-1.5"><i data-lucide="coins" class="w-3.5 h-3.5"></i> Фин. условия</h4>
               <div>
-                <label class="block font-semibold text-zinc-300 mb-1">Ставка за 12ч смену (руб.)</label>
-                <input type="number" id="my-spec-rate" value="45000" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-white font-mono font-bold text-sm">
+                <label class="block font-semibold text-zinc-300 mb-1 text-[11px]">Ставка за смену (руб.)</label>
+                <input type="number" id="my-spec-rate" value="45000" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-1.5 text-white font-mono font-bold">
               </div>
-
               <label class="flex items-center gap-2 cursor-pointer pt-1">
-                <input type="checkbox" id="my-spec-tfp" checked class="w-4 h-4 rounded bg-zinc-900 border-zinc-700 text-emerald-500 accent-emerald-500">
-                <span class="text-xs font-semibold text-emerald-400">🎨 Готов к творческим / TFP проектам</span>
+                <input type="checkbox" id="my-spec-tfp" checked class="w-3.5 h-3.5 rounded bg-zinc-900 border-zinc-700 text-emerald-500 accent-emerald-500">
+                <span class="text-[11px] font-semibold text-emerald-400">🎨 Готов к TFP проектам</span>
               </label>
             </div>
 
             <div>
-              <label class="block font-semibold text-zinc-300 mb-1">Оборудование и теги (через запятую)</label>
-              <input type="text" id="my-spec-tags" value="grandMA2, grandMA3, Avolites Titan, Blackout, Capture 2023" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-white font-mono">
+              <label class="block font-semibold text-zinc-300 mb-1">Теги оборудования</label>
+              <input type="text" id="my-spec-tags" value="grandMA2, grandMA3, Avolites Titan, Blackout, Capture 2023" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-white font-mono">
             </div>
           </div>
 
-          <div class="space-y-4">
+          <div class="space-y-3">
             <div>
-              <label class="block font-semibold text-zinc-300 mb-1">Ссылка на Шоурил (YouTube / Vimeo embed)</label>
-              <input type="text" id="my-spec-showreel" value="https://www.youtube.com/embed/dQw4w9WgXcQ" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-white">
+              <label class="block font-semibold text-zinc-300 mb-1">Шоурил URL</label>
+              <input type="text" id="my-spec-showreel" value="https://www.youtube.com/embed/dQw4w9WgXcQ" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-white">
             </div>
 
             <div>
-              <label class="block font-semibold text-zinc-300 mb-1">О себе и квалификация</label>
-              <textarea id="my-spec-bio" rows="4" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white">Светодизайнер со стажем работы на стадионных шоу, съёмках музыкальных клипов и кино. В совершенстве владею пультами grandMA2/3, симуляцией в Capture.</textarea>
+              <label class="block font-semibold text-zinc-300 mb-1">О себе</label>
+              <textarea id="my-spec-bio" rows="3" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white">Светодизайнер со стажем работы на стадионных шоу, съёмках клипов и кино. Владею пультами grandMA2/3.</textarea>
             </div>
 
-            <!-- Interactive Calendar Editor -->
-            <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-2xl space-y-2">
-              <div class="flex items-center justify-between">
-                <h4 class="font-semibold text-white flex items-center gap-1.5">
-                  <i data-lucide="calendar" class="w-4 h-4 text-cyan-400"></i> Мой график занятости (Август 2026)
-                </h4>
-                <span class="text-[10px] text-zinc-400">Кликните на число, чтобы сменить статус</span>
-              </div>
-              <p class="text-[11px] text-zinc-500">Зеленый = Свободен, Красный = Занят на съемке</p>
-
-              <div id="interactive-spec-calendar" class="grid grid-cols-7 gap-1 text-center font-mono text-xs pt-2">
-                <!-- Rendered JS -->
-              </div>
+            <div class="p-3 bg-zinc-950 border border-zinc-800 rounded-xl space-y-1.5">
+              <h4 class="font-semibold text-white text-xs flex items-center gap-1.5"><i data-lucide="calendar" class="w-3.5 h-3.5 text-cyan-400"></i> График (Август 2026)</h4>
+              <p class="text-[10px] text-zinc-500">Зеленый = Свободен, Красный = Занят</p>
+              <div id="interactive-spec-calendar" class="grid grid-cols-7 gap-1 text-center font-mono text-[10px] pt-1"></div>
             </div>
           </div>
         </form>
       </div>
-
     </div>
 
-    <!-- 3. ЛИЧНЫЙ КАБИНЕТ НАНИМАТЕЛЯ (ПРОДЮСЕРА / КОМПАНИИ) -->
-    <div id="view-dashboard-prod" class="hidden space-y-6">
-      
-      <div class="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5 sm:p-6 space-y-5">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+    <!-- 3. ЛИЧНЫЙ КАБИНЕТ НАНИМАТЕЛЯ -->
+    <div id="view-dashboard-prod" class="hidden space-y-4 min-w-0">
+      <div class="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800 pb-3">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-bold text-lg">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-bold text-base shrink-0">
               КП
             </div>
-            <div>
-              <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                Кинокомпания «КиноПродакшен»
-                <span class="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold">Работодатель</span>
-              </h2>
-              <p class="text-xs text-zinc-400">Продюсер: Михаил Сергеевич • Москва</p>
+            <div class="min-w-0">
+              <h2 class="text-base sm:text-lg font-bold text-white truncate">КиноКомпания «КиноПродакшен»</h2>
+              <p class="text-[11px] sm:text-xs text-zinc-400 truncate">Продюсер: Михаил Сергеевич • Москва</p>
             </div>
           </div>
 
-          <button onclick="openCreateProjectModal()" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs rounded-xl shadow-lg flex items-center justify-center gap-2 touch-bounce">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i> Создать проект / вакансию
+          <button onclick="openCreateProjectModal()" class="w-full sm:w-auto px-4 py-2 bg-amber-500 text-zinc-950 font-bold text-xs rounded-xl shadow-lg flex items-center justify-center gap-2 touch-bounce">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Создать проект
           </button>
         </div>
 
-        <!-- Projects Created & Bookings Sent -->
-        <div class="space-y-4">
-          <h3 class="text-sm font-bold text-white flex items-center gap-2">
-            <i data-lucide="folder-kanban" class="w-4 h-4 text-cyan-400"></i> Мои активные съемки и заявки
+        <div class="space-y-3">
+          <h3 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+            <i data-lucide="folder-kanban" class="w-4 h-4 text-cyan-400"></i> Мои съемки и бронирования
           </h3>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            <div class="glass-card p-4 rounded-2xl space-y-3">
-              <div class="flex items-center justify-between text-xs">
-                <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">В работе</span>
-                <span class="text-zinc-400 font-mono text-[11px]">12.08.2026 - 15.08.2026</span>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="glass-card p-3.5 rounded-2xl space-y-2">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="font-mono text-[9px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">В работе</span>
+                <span class="text-zinc-400 font-mono text-[10px]">12.08 - 15.08.2026</span>
               </div>
-              <h4 class="font-bold text-white text-sm">Полнометражный фильм «Темная глубина»</h4>
-              <p class="text-xs text-zinc-400">Локация: Павильон Мосфильм. Бюджет смены: 50 000 ₽ / чел.</p>
-              
-              <div class="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-xs">
-                <span class="text-zinc-400">Забронировано: <strong class="text-emerald-400 font-mono">Александр Волков (Гафер)</strong></span>
-                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">Подтверждено</span>
+              <h4 class="font-bold text-white text-xs sm:text-sm">Фильм «Темная глубина»</h4>
+              <p class="text-[11px] text-zinc-400 line-clamp-2">Мосфильм. Бюджет смены: 50 000 ₽ / чел.</p>
+              <div class="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px]">
+                <span class="text-zinc-400 truncate">Гафер: <strong class="text-emerald-400">Александр В.</strong></span>
+                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold shrink-0">Подтверждено</span>
               </div>
             </div>
 
-            <div class="glass-card p-4 rounded-2xl space-y-3">
-              <div class="flex items-center justify-between text-xs">
-                <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold">Сбор смены</span>
-                <span class="text-zinc-400 font-mono text-[11px]">20.08.2026</span>
+            <div class="glass-card p-3.5 rounded-2xl space-y-2">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="font-mono text-[9px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold">Сбор смены</span>
+                <span class="text-zinc-400 font-mono text-[10px]">20.08.2026</span>
               </div>
-              <h4 class="font-bold text-white text-sm">Клип «Skyline Echoes»</h4>
-              <p class="text-xs text-zinc-400">Локация: Крокус Сити. Ищем: Звукорежиссера FOH (Midas M32).</p>
-              
-              <div class="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-xs">
-                <span class="text-zinc-400">Заявка отправлена: <strong class="text-cyan-400 font-mono">Елена Морозова</strong></span>
-                <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 text-[10px] font-bold">В ожидании</span>
+              <h4 class="font-bold text-white text-xs sm:text-sm">Клип «Skyline Echoes»</h4>
+              <p class="text-[11px] text-zinc-400 line-clamp-2">Крокус Сити. Нужен FOH (Midas M32).</p>
+              <div class="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px]">
+                <span class="text-zinc-400 truncate">Звукорежиссер: <strong class="text-cyan-400">Елена М.</strong></span>
+                <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold shrink-0">В ожидании</span>
               </div>
             </div>
-
           </div>
         </div>
-
       </div>
-
     </div>
 
   </main>
 
-  <!-- MOBILE BOTTOM NAVIGATION -->
-  <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-zinc-950/95 backdrop-blur-xl border-t border-zinc-800/90 h-14 flex items-center justify-around px-2">
-    <button id="mobile-nav-catalog" onclick="switchNav('catalog')" class="flex flex-col items-center gap-0.5 text-cyan-400 font-bold text-[10px]">
-      <i data-lucide="users" class="w-5 h-5"></i>
+  <!-- Mobile Bottom Safe Navigation -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-zinc-950/95 backdrop-blur-xl border-t border-zinc-800/90 h-14 flex items-center justify-around px-1 w-full">
+    <button id="mobile-nav-catalog" onclick="switchNav('catalog')" class="flex flex-col items-center gap-0.5 text-cyan-400 font-bold text-[10px] w-1/3">
+      <i data-lucide="users" class="w-4 h-4"></i>
       <span>Каталог</span>
     </button>
-    <button id="mobile-nav-dashboard-spec" onclick="switchNav('dashboard-spec')" class="flex flex-col items-center gap-0.5 text-zinc-400 font-medium text-[10px]">
-      <i data-lucide="user" class="w-5 h-5"></i>
+    <button id="mobile-nav-dashboard-spec" onclick="switchNav('dashboard-spec')" class="flex flex-col items-center gap-0.5 text-zinc-400 font-medium text-[10px] w-1/3">
+      <i data-lucide="user" class="w-4 h-4"></i>
       <span>Соискатель</span>
     </button>
-    <button id="mobile-nav-dashboard-prod" onclick="switchNav('dashboard-prod')" class="flex flex-col items-center gap-0.5 text-zinc-400 font-medium text-[10px]">
-      <i data-lucide="briefcase" class="w-5 h-5"></i>
+    <button id="mobile-nav-dashboard-prod" onclick="switchNav('dashboard-prod')" class="flex flex-col items-center gap-0.5 text-zinc-400 font-medium text-[10px] w-1/3">
+      <i data-lucide="briefcase" class="w-4 h-4"></i>
       <span>Наниматель</span>
-    </button>
-    <button onclick="openCustomCategoryModal()" class="flex flex-col items-center gap-0.5 text-emerald-400 font-medium text-[10px]">
-      <i data-lucide="plus-circle" class="w-5 h-5"></i>
-      <span>+Проф.</span>
     </button>
   </nav>
 
-  <!-- SPECIALIST PROFILE MODAL -->
+  <!-- SPECIALIST PROFILE MODAL (Mobile Safe Dialog) -->
   <div id="specialist-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto">
     <div class="bg-zinc-900 border-t sm:border border-zinc-800 rounded-t-3xl sm:rounded-3xl max-w-3xl w-full max-h-[92vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl relative">
       <button onclick="closeSpecialistModal()" class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-zinc-800 text-zinc-300 flex items-center justify-center">
@@ -437,98 +432,67 @@
 
       <div id="modal-header-banner" class="p-4 sm:p-6 bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border-b border-zinc-800 flex flex-row items-center gap-3 sm:gap-5"></div>
 
-      <div class="flex items-center gap-2 border-b border-zinc-800 px-4 sm:px-6 pt-2 bg-zinc-950/40 overflow-x-auto text-xs">
+      <div class="flex items-center gap-1.5 border-b border-zinc-800 px-3 sm:px-6 pt-2 bg-zinc-950/40 overflow-x-auto text-xs scrollbar-none">
         <button id="tab-btn-about" onclick="switchModalTab('about')" class="px-3 py-2 font-bold border-b-2 border-cyan-400 text-cyan-400 whitespace-nowrap">О себе</button>
         <button id="tab-btn-media" onclick="switchModalTab('media')" class="px-3 py-2 font-medium text-zinc-400 whitespace-nowrap">Медиа & Шоурил</button>
-        <button id="tab-btn-skills" onclick="switchModalTab('skills')" class="px-3 py-2 font-medium text-zinc-400 whitespace-nowrap">Опыт & Оборудование</button>
+        <button id="tab-btn-skills" onclick="switchModalTab('skills')" class="px-3 py-2 font-medium text-zinc-400 whitespace-nowrap">Опыт & Навыки</button>
         <button id="tab-btn-calendar" onclick="switchModalTab('calendar')" class="px-3 py-2 font-medium text-zinc-400 whitespace-nowrap">Календарь</button>
       </div>
 
       <div class="p-4 sm:p-6 space-y-4">
-        <div id="modal-tab-about" class="space-y-4">
+        <div id="modal-tab-about" class="space-y-3">
           <div>
             <h4 class="text-[10px] uppercase font-semibold text-zinc-400 mb-1">Биография</h4>
-            <p id="modal-bio" class="text-xs text-zinc-300 leading-relaxed"></p>
+            <p id="modal-bio" class="text-xs text-zinc-300 leading-relaxed break-word-custom"></p>
           </div>
-          <div class="bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800 space-y-1">
-            <h4 class="text-xs font-semibold text-cyan-400 flex items-center gap-1.5"><i data-lucide="wallet" class="w-3.5 h-3.5"></i> Условия оплаты</h4>
-            <p id="modal-payment-notes" class="text-xs text-zinc-400"></p>
+          <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-1">
+            <h4 class="text-xs font-semibold text-cyan-400 flex items-center gap-1.5"><i data-lucide="wallet" class="w-3.5 h-3.5"></i> Оплата</h4>
+            <p id="modal-payment-notes" class="text-xs text-zinc-400 break-word-custom"></p>
           </div>
         </div>
 
-        <div id="modal-tab-media" class="hidden space-y-4">
-          <div class="aspect-video w-full rounded-2xl overflow-hidden bg-black border border-zinc-800">
+        <div id="modal-tab-media" class="hidden space-y-3">
+          <div class="aspect-video w-full rounded-xl overflow-hidden bg-black border border-zinc-800">
             <iframe id="modal-showreel-iframe" class="w-full h-full" src="" frameborder="0" allowfullscreen></iframe>
           </div>
           <div id="modal-gallery-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
         </div>
 
-        <div id="modal-tab-skills" class="hidden space-y-4">
+        <div id="modal-tab-skills" class="hidden space-y-3">
           <div id="modal-equipment-tags" class="flex flex-wrap gap-1.5"></div>
-          <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="grid grid-cols-2 gap-2 text-xs">
             <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800">
               <span class="text-zinc-400 block text-[10px]">Образование</span>
-              <strong id="modal-education" class="text-white text-xs block mt-0.5"></strong>
+              <strong id="modal-education" class="text-white text-[11px] sm:text-xs block mt-0.5 line-clamp-2"></strong>
             </div>
             <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800">
               <span class="text-zinc-400 block text-[10px]">Проектов</span>
-              <strong id="modal-projects-count" class="text-cyan-400 font-mono font-bold text-sm block mt-0.5"></strong>
+              <strong id="modal-projects-count" class="text-cyan-400 font-mono font-bold text-xs sm:text-sm block mt-0.5"></strong>
             </div>
           </div>
         </div>
 
         <div id="modal-tab-calendar" class="hidden space-y-3">
-          <div id="modal-calendar-grid" class="grid grid-cols-7 gap-1 text-center font-mono text-[11px]"></div>
+          <div id="modal-calendar-grid" class="grid grid-cols-7 gap-1 text-center font-mono text-[10px]"></div>
         </div>
       </div>
 
-      <div class="p-4 sm:p-6 bg-zinc-950 border-t border-zinc-800 flex items-center justify-between sticky bottom-0">
+      <div class="p-3.5 sm:p-5 bg-zinc-950 border-t border-zinc-800 flex items-center justify-between sticky bottom-0">
         <div>
-          <span class="text-[9px] uppercase text-zinc-400 block">Ставка за смену</span>
-          <div id="modal-footer-rate" class="text-base sm:text-lg font-extrabold text-white font-mono"></div>
+          <span class="text-[9px] uppercase text-zinc-400 block">Ставка</span>
+          <div id="modal-footer-rate" class="text-sm sm:text-lg font-extrabold text-white font-mono"></div>
         </div>
-        <button onclick="bookingRequestAction()" class="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-emerald-500 text-zinc-950 font-extrabold text-xs rounded-xl shadow-lg flex items-center gap-1.5 touch-bounce">
+        <button onclick="bookingRequestAction()" class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-emerald-500 text-zinc-950 font-extrabold text-xs rounded-xl shadow-lg flex items-center gap-1.5 touch-bounce">
           <i data-lucide="send" class="w-3.5 h-3.5"></i> Забронировать
         </button>
       </div>
     </div>
   </div>
 
-  <!-- CUSTOM SUBCATEGORY MODAL -->
-  <div id="custom-cat-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl relative">
-      <button onclick="closeCustomCategoryModal()" class="absolute top-4 right-4 text-zinc-400">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-
-      <div>
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i> Добавить свою специальность
-        </h3>
-        <p class="text-xs text-zinc-400 mt-0.5">Отправить заявку на модерацию в справочник.</p>
-      </div>
-
-      <form onsubmit="submitCustomCategory(event)" class="space-y-3">
-        <div>
-          <label class="block text-xs font-semibold text-zinc-300 mb-1">Выберите цех</label>
-          <select id="custom-dept-select" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white"></select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-zinc-300 mb-1">Название специальности</label>
-          <input type="text" id="custom-name-input" required placeholder="Например: Оператор Mo-Sys" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white">
-        </div>
-        <div class="pt-2 flex justify-end gap-2">
-          <button type="button" onclick="closeCustomCategoryModal()" class="px-3.5 py-2 rounded-xl border border-zinc-800 text-xs font-medium text-zinc-400">Отмена</button>
-          <button type="submit" class="px-4 py-2 bg-emerald-600 text-zinc-950 font-bold text-xs rounded-xl shadow-lg">Отправить</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- TOAST NOTIFICATION -->
-  <div id="toast" class="fixed bottom-16 lg:bottom-5 right-4 left-4 lg:left-auto z-50 hidden bg-zinc-900 border border-emerald-500/40 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs">
-    <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 shrink-0"></i>
-    <span id="toast-message">Успешно!</span>
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-16 lg:bottom-5 right-3 left-3 lg:left-auto z-50 hidden bg-zinc-900 border border-emerald-500/40 text-white px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2.5 text-xs">
+    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+    <span id="toast-message" class="truncate">Успешно!</span>
   </div>
 
   <script src="app.js"></script>
