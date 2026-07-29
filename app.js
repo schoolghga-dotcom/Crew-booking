@@ -437,16 +437,7 @@ function resetFilters() {
   document.getElementById('filter-max-rate').value = 100000;
   document.getElementById('filter-tfp').checked = false;
   document.getElementById('filter-exp').value = 0;
-  document.getElementById('filter-showreel').checked = false;
-  document.getElementById('filter-date').value = '';
-
-  document.getElementById('rate-value-display').textContent = '100 000 ₽';
-  document.getElementById('exp-value-display').textContent = 'Любой';
-
-  onDepartmentChange();
-}
-
-// Selected Roles Multiselect State
+  document.getElementById('filter-showreel').checked = false// Employer Roles Selection Panel Logic
 let selectedProjectRoles = ["Гафер (Gaffer)", "Фокус-пуллер (1st AC)"];
 
 function openCreateProjectModal() {
@@ -457,19 +448,22 @@ function openCreateProjectModal() {
 
 function closeCreateProjectModal() {
   document.getElementById('create-project-modal').classList.add('hidden');
-  document.getElementById('project-roles-dropdown').classList.add('hidden');
+  const panel = document.getElementById('project-roles-panel');
+  if (panel) panel.classList.add('hidden');
 }
 
-function toggleProjectRolesDropdown(e) {
-  if (e) e.stopPropagation();
-  const dropdown = document.getElementById('project-roles-dropdown');
-  if (!dropdown) return;
-  
-  if (dropdown.classList.contains('hidden')) {
+function toggleRolesListSection() {
+  const panel = document.getElementById('project-roles-panel');
+  const toggleText = document.getElementById('roles-toggle-text');
+  if (!panel) return;
+
+  if (panel.classList.contains('hidden')) {
     renderRolesDropdownTree();
-    dropdown.classList.remove('hidden');
+    panel.classList.remove('hidden');
+    if (toggleText) toggleText.textContent = '▲ Скрыть список';
   } else {
-    dropdown.classList.add('hidden');
+    panel.classList.add('hidden');
+    if (toggleText) toggleText.textContent = '▼ Выбрать профессии';
   }
 }
 
@@ -522,14 +516,13 @@ function renderRolesDropdownTree(searchQuery = '') {
 
     container.appendChild(deptGroup);
   });
-  lucide.createIcons();
 }
 
-
-
 function filterRolesDropdown() {
-  const q = document.getElementById('roles-dropdown-search').value;
-  renderRolesDropdownTree(q);
+  const searchInput = document.getElementById('roles-dropdown-search');
+  if (searchInput) {
+    renderRolesDropdownTree(searchInput.value);
+  }
 }
 
 function toggleRoleSelection(prof) {
@@ -546,28 +539,16 @@ function updateSelectedRolesTriggerUI() {
   if (!container) return;
 
   if (selectedProjectRoles.length === 0) {
-    container.innerHTML = `<span class="text-zinc-500 text-xs">Выберите специальности...</span>`;
+    container.innerHTML = `<span class="text-zinc-500 text-xs">Нажмите, чтобы выбрать специальности...</span>`;
   } else {
     container.innerHTML = selectedProjectRoles.map(role => `
       <span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
         ${role}
-        <i onclick="event.stopPropagation(); toggleRoleSelection('${role}');" data-lucide="x" class="w-3 h-3 hover:text-white cursor-pointer"></i>
+        <span onclick="event.stopPropagation(); toggleRoleSelection('${role}');" class="hover:text-white font-bold cursor-pointer ml-0.5">✕</span>
       </span>
     `).join('');
-    lucide.createIcons();
   }
 }
-
-// Close Dropdown when clicking outside
-document.addEventListener('click', (e) => {
-  const dropdown = document.getElementById('project-roles-dropdown');
-  const triggerBtn = e.target.closest('button[onclick*="toggleProjectRolesDropdown"]');
-  if (dropdown && !dropdown.contains(e.target) && !triggerBtn) {
-    dropdown.classList.add('hidden');
-  }
-});
-
-
 function submitNewProject(e) {
   e.preventDefault();
   const name = document.getElementById('project-name-input').value.trim();
@@ -583,7 +564,6 @@ function bookingRequestAction() {
   }
 }
 
-
 function showToast(msg) {
   const toast = document.getElementById('toast');
   document.getElementById('toast-message').textContent = msg;
@@ -592,3 +572,4 @@ function showToast(msg) {
     toast.classList.add('hidden');
   }, 3500);
 }
+
