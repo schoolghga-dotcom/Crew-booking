@@ -1,4 +1,9 @@
-// Crew Booking Platform Logic Engine
+// Mobile Drawer toggle function
+function toggleMobileFilters() {
+  const drawer = document.getElementById('mobile-filter-drawer');
+  drawer.classList.toggle('hidden');
+}
+
 
 let departmentsData = [];
 let specialistsData = [];
@@ -469,15 +474,32 @@ function switchNav(nav) {
   ['catalog', 'projects', 'admin'].forEach(n => {
     document.getElementById(`view-${n}`).classList.add('hidden');
     const btn = document.getElementById(`nav-${n}`);
-    btn.classList.remove('bg-zinc-800', 'text-white');
-    btn.classList.add('text-zinc-400');
+    if (btn) {
+      btn.classList.remove('bg-zinc-800', 'text-white');
+      btn.classList.add('text-zinc-400');
+    }
+
+    const mobBtn = document.getElementById(`mobile-nav-${n}`);
+    if (mobBtn) {
+      mobBtn.classList.remove('text-cyan-400', 'font-bold');
+      mobBtn.classList.add('text-zinc-400', 'font-medium');
+    }
   });
 
   document.getElementById(`view-${nav}`).classList.remove('hidden');
   const activeBtn = document.getElementById(`nav-${nav}`);
-  activeBtn.classList.add('bg-zinc-800', 'text-white');
-  activeBtn.classList.remove('text-zinc-400');
+  if (activeBtn) {
+    activeBtn.classList.add('bg-zinc-800', 'text-white');
+    activeBtn.classList.remove('text-zinc-400');
+  }
+
+  const activeMobBtn = document.getElementById(`mobile-nav-${nav}`);
+  if (activeMobBtn) {
+    activeMobBtn.classList.add('text-cyan-400', 'font-bold');
+    activeMobBtn.classList.remove('text-zinc-400', 'font-medium');
+  }
 }
+
 
 function resetFilters() {
   document.getElementById('filter-search').value = '';
