@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark h-full bg-zinc-950 text-zinc-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crew Booking — Поиск и бронирование съемочного и технического персонала</title>
+  <meta name="description" content="Платформа для подбора квалифицированного технического персонала, кинооператоров, гаферов, звукорежиссеров и риггеров на съемочные и ивент-площадки.">
+  
+  <!-- Tailwind CSS CDN & Custom Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            zinc: {
+              950: '#09090b',
+              900: '#121215',
+              850: '#18181c',
+              800: '#27272a',
+              700: '#3f3f46',
+            },
+            accent: {
+              emerald: '#10b981',
+              cyan: '#06b6d4',
+              amber: '#f59e0b',
+              violet: '#8b5cf6',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    code, pre, .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #09090b;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #27272a;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3f3f46;
+    }
+    .glass-card {
+      background: rgba(24, 24, 28, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glass-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-full flex flex-col antialiased selection:bg-cyan-500 selection:text-black">
+
+  <!-- Header / Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="resetFilters()">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-emerald-500 to-indigo-600 p-[2px] shadow-lg shadow-cyan-950/40">
+          <div class="w-full h-full bg-zinc-950 rounded-[10px] flex items-center justify-center">
+            <i data-lucide="clapperboard" class="w-5 h-5 text-cyan-400"></i>
+          </div>
+        </div>
+        <div>
+          <span class="font-extrabold text-lg tracking-tight text-white flex items-center gap-1.5">
+            CREW <span class="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">BOOKING</span>
+          </span>
+          <span class="block text-[10px] uppercase tracking-widest text-zinc-400 font-medium">Production Technical Hub</span>
+        </div>
+      </div>
+
+      <!-- Navigation & Role Switcher -->
+      <div class="flex items-center gap-4">
+        <!-- View Toggle Buttons -->
+        <nav class="hidden md:flex items-center gap-1 bg-zinc-900/90 p-1 rounded-xl border border-zinc-800">
+          <button id="nav-catalog" onclick="switchNav('catalog')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all bg-zinc-800 text-white shadow-sm flex items-center gap-2">
+            <i data-lucide="users" class="w-4 h-4 text-cyan-400"></i> Специалисты
+          </button>
+          <button id="nav-projects" onclick="switchNav('projects')" class="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white transition-all flex items-center gap-2">
+            <i data-lucide="folder-kanban" class="w-4 h-4"></i> Проекты
+          </button>
+          <button id="nav-admin" onclick="switchNav('admin')" class="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white transition-all flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i> Модерация <span id="pending-count-badge" class="ml-1 bg-amber-500/20 text-amber-400 text-[10px] px-1.5 py-0.5 rounded-full font-bold">1</span>
+          </button>
+        </nav>
+
+        <!-- CTA Action: Add Custom Subcategory -->
+        <button onclick="openCustomCategoryModal()" class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white transition-all shadow-sm">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i> Своя специальность
+        </button>
+
+        <!-- User Role Switcher Demo -->
+        <div class="relative group">
+          <button class="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-1.5 text-xs text-zinc-300 hover:text-white transition-all">
+            <div class="w-6 h-6 rounded-full bg-cyan-600/30 text-cyan-400 font-bold flex items-center justify-center text-[10px]">ПМ</div>
+            <span class="hidden sm:inline font-medium">Продюсер</span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-zinc-400"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Workspace Layout -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- CATALOG VIEW CONTAINER -->
+    <div id="view-catalog" class="space-y-6">
+      
+      <!-- Top Bar: Quick Stats & Mode Switchers -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4">
+        <div>
+          <h1 class="text-xl font-bold text-white flex items-center gap-2">
+            База техперсонала и специалистов
+            <span id="results-count" class="text-xs bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-semibold px-2.5 py-0.5 rounded-full">6 специалистов</span>
+          </h1>
+          <p class="text-xs text-zinc-400 mt-1">Фильтрация по оборудованию (grandMA2, Midas M32, Accsoon), цехам, датам и финансовым условиям.</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <!-- View Switcher (Grid / List Table) -->
+          <div class="flex items-center bg-zinc-950 p-1 rounded-xl border border-zinc-800">
+            <button id="btn-view-grid" onclick="setCatalogLayout('grid')" class="p-1.5 rounded-lg text-zinc-200 bg-zinc-800 transition-all" title="Сетка карточек">
+              <i data-lucide="layout-grid" class="w-4 h-4"></i>
+            </button>
+            <button id="btn-view-list" onclick="setCatalogLayout('list')" class="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 transition-all" title="Компактная таблица">
+              <i data-lucide="list" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Quick Filters Reset -->
+          <button onclick="resetFilters()" class="px-3 py-1.5 rounded-xl border border-zinc-800 text-xs font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all flex items-center gap-1.5">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Сбросить
+          </button>
+        </div>
+      </div>
+
+      <!-- Grid Layout: Filter Sidebar + Specialists Stream -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+        <!-- 6.1. Sidebar Filters (Left Column) -->
+        <aside class="lg:col-span-1 space-y-5 bg-zinc-900/70 border border-zinc-800/80 rounded-2xl p-5 h-fit backdrop-blur-sm sticky top-20">
+          
+          <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <h2 class="font-bold text-sm text-white flex items-center gap-2">
+              <i data-lucide="sliders-horizontal" class="w-4 h-4 text-cyan-400"></i> Фильтры поиска
+            </h2>
+          </div>
+
+          <!-- Text Search -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-zinc-300">Поиск</label>
+            <div class="relative">
+              <i data-lucide="search" class="w-4 h-4 text-zinc-400 absolute left-3 top-3"></i>
+              <input type="text" id="filter-search" oninput="applyFilters()" placeholder="Имя, тег (grandMA2), должность..." 
+                     class="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500 transition-all">
+            </div>
+          </div>
+
+          <!-- Tree Category Select -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-zinc-300">Цех / Отдел</label>
+            <select id="filter-department" onchange="onDepartmentChange()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 transition-all">
+              <option value="">Все цехи (Все 9 направлений)</option>
+            </select>
+          </div>
+
+          <!-- Subcategory / Profession Select -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-zinc-300">Профессия / Специализация</label>
+            <select id="filter-profession" onchange="applyFilters()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 transition-all">
+              <option value="">Все профессии</option>
+            </select>
+          </div>
+
+          <!-- Finance Range Slider -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <label class="font-semibold text-zinc-300">Макс. ставка за смену</label>
+              <span id="rate-value-display" class="font-mono font-bold text-cyan-400">100 000 ₽</span>
+            </div>
+            <input type="range" id="filter-max-rate" min="10000" max="100000" step="5000" value="100000" oninput="onRateInput(this.value)" class="w-full accent-cyan-500 cursor-pointer">
+            <div class="flex justify-between text-[10px] text-zinc-500 font-mono">
+              <span>10k ₽</span>
+              <span>50k ₽</span>
+              <span>100k ₽+</span>
+            </div>
+          </div>
+
+          <!-- Creative / TFP Checkbox Badge Filter -->
+          <div class="pt-2 border-t border-zinc-800/80">
+            <label class="flex items-center gap-2.5 cursor-pointer group">
+              <input type="checkbox" id="filter-tfp" onchange="applyFilters()" class="w-4 h-4 rounded bg-zinc-950 border-zinc-700 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-950 accent-emerald-500">
+              <span class="text-xs font-medium text-zinc-300 group-hover:text-emerald-400 transition-all flex items-center gap-1.5">
+                <span class="text-emerald-400 font-bold">🎨</span> Только готовые к творчеству / TFP
+              </span>
+            </label>
+          </div>
+
+          <!-- Experience Slider & Showreel Filter -->
+          <div class="space-y-3 pt-3 border-t border-zinc-800/80">
+            <div class="flex items-center justify-between text-xs">
+              <label class="font-semibold text-zinc-300">Минимальный опыт</label>
+              <span id="exp-value-display" class="font-mono text-zinc-400">Любой</span>
+            </div>
+            <input type="range" id="filter-exp" min="0" max="10" step="1" value="0" oninput="onExpInput(this.value)" class="w-full accent-cyan-500 cursor-pointer">
+            
+            <label class="flex items-center gap-2 cursor-pointer pt-1">
+              <input type="checkbox" id="filter-showreel" onchange="applyFilters()" class="w-4 h-4 rounded bg-zinc-950 border-zinc-700 text-cyan-500 accent-cyan-500">
+              <span class="text-xs text-zinc-300 hover:text-white transition-all flex items-center gap-1">
+                <i data-lucide="video" class="w-3.5 h-3.5 text-cyan-400"></i> Только с Шоурилом (Video)
+              </span>
+            </label>
+          </div>
+
+          <!-- Availability Date Filter -->
+          <div class="space-y-1.5 pt-3 border-t border-zinc-800/80">
+            <label class="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 text-cyan-400"></i> Свободная дата съемок
+            </label>
+            <input type="date" id="filter-date" onchange="applyFilters()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 transition-all">
+          </div>
+
+        </aside>
+
+        <!-- Catalog Specialists Output Area (Right Column) -->
+        <section class="lg:col-span-3">
+          
+          <!-- Grid View Container -->
+          <div id="catalog-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <!-- Dynamic Specialist Cards rendered via JS -->
+          </div>
+
+          <!-- List Table View Container (Hidden by default) -->
+          <div id="catalog-list" class="hidden bg-zinc-900/70 border border-zinc-800/80 rounded-2xl overflow-hidden backdrop-blur-sm">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-zinc-300">
+                <thead class="bg-zinc-950/80 text-zinc-400 font-semibold border-b border-zinc-800 uppercase tracking-wider text-[10px]">
+                  <tr>
+                    <th class="p-3.5">Специалист</th>
+                    <th class="p-3.5">Основной Цех / Профессия</th>
+                    <th class="p-3.5">Ключевые Теги</th>
+                    <th class="p-3.5">Ставка</th>
+                    <th class="p-3.5">Рейтинг</th>
+                    <th class="p-3.5 text-right">Действие</th>
+                  </tr>
+                </thead>
+                <tbody id="catalog-table-body" class="divide-y divide-zinc-800/60">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div id="empty-state" class="hidden text-center py-16 bg-zinc-900/40 border border-dashed border-zinc-800 rounded-2xl">
+            <div class="w-12 h-12 rounded-full bg-zinc-800/80 text-zinc-500 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="search-x" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-sm font-bold text-white">Специалисты не найдены</h3>
+            <p class="text-xs text-zinc-400 mt-1 max-w-sm mx-auto">Попробуйте ослабить параметры фильтрации или выбрать другой цех.</p>
+            <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-zinc-950 font-semibold text-xs rounded-xl transition-all shadow-lg shadow-cyan-950/40">
+              Сбросить все фильтры
+            </button>
+          </div>
+
+        </section>
+
+      </div>
+    </div>
+
+    <!-- PROJECTS VIEW CONTAINER (Hidden by default) -->
+    <div id="view-projects" class="hidden space-y-6">
+      <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white">Мои Проекты и Вакансии</h2>
+            <p class="text-xs text-zinc-400 mt-1">Формирование смен, отправка предложений (booking request) и сборка технической команды.</p>
+          </div>
+          <button class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-zinc-950 font-bold text-xs rounded-xl transition-all flex items-center gap-2">
+            <i data-lucide="plus" class="w-4 h-4"></i> Создать новый проект
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+          <div class="glass-card p-5 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase font-bold">Активный проект</span>
+              <span class="text-xs text-zinc-400 font-mono">12.08.2026 - 15.08.2026</span>
+            </div>
+            <h3 class="font-bold text-base text-white">Рекламный ролик «NeoDrive 2026»</h3>
+            <p class="text-xs text-zinc-400">Локация: Павильон Главкино, Москва. Требуются: Гафер (grandMA2), Фокус-пуллер, SFX Гример.</p>
+            <div class="pt-3 border-t border-zinc-800 flex items-center justify-between text-xs">
+              <span class="text-zinc-400">Собрано смены: <strong class="text-white font-mono">2 / 5</strong></span>
+              <button onclick="switchNav('catalog')" class="text-cyan-400 hover:underline font-semibold flex items-center gap-1">
+                Подключить специалистов <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN VIEW CONTAINER (Hidden by default) -->
+    <div id="view-admin" class="hidden space-y-6">
+      <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="shield-check" class="w-5 h-5 text-amber-400"></i> Панель администрирования
+            </h2>
+            <p class="text-xs text-zinc-400 mt-1">Модерация кастомных подкатегорий и заявленных профессий от пользователей.</p>
+          </div>
+        </div>
+
+        <div class="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
+          <table class="w-full text-left text-xs text-zinc-300">
+            <thead class="bg-zinc-900 text-zinc-400 font-semibold border-b border-zinc-800 uppercase tracking-wider text-[10px]">
+              <tr>
+                <th class="p-3.5">Предложенная специальность</th>
+                <th class="p-3.5">Цех</th>
+                <th class="p-3.5">Заявитель</th>
+                <th class="p-3.5">Статус</th>
+                <th class="p-3.5 text-right">Модерация</th>
+              </tr>
+            </thead>
+            <tbody id="admin-custom-table" class="divide-y divide-zinc-800/60">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 6.3. FULL SPECIALIST PROFILE MODAL -->
+  <div id="specialist-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative">
+      
+      <!-- Close Modal Button -->
+      <button onclick="closeSpecialistModal()" class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-zinc-800/80 text-zinc-300 hover:text-white flex items-center justify-center transition-all">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Modal Header Banner -->
+      <div id="modal-header-banner" class="p-6 bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border-b border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center gap-5">
+        <!-- Rendered JS -->
+      </div>
+
+      <!-- Modal Navigation Tabs -->
+      <div class="flex items-center gap-2 border-b border-zinc-800 px-6 pt-3 bg-zinc-950/40">
+        <button id="tab-btn-about" onclick="switchModalTab('about')" class="px-4 py-2 text-xs font-bold border-b-2 border-cyan-400 text-cyan-400">О себе & Оплата</button>
+        <button id="tab-btn-media" onclick="switchModalTab('media')" class="px-4 py-2 text-xs font-medium text-zinc-400 hover:text-zinc-200">Медиа & Шоурил</button>
+        <button id="tab-btn-skills" onclick="switchModalTab('skills')" class="px-4 py-2 text-xs font-medium text-zinc-400 hover:text-zinc-200">Опыт & Оборудование</button>
+        <button id="tab-btn-calendar" onclick="switchModalTab('calendar')" class="px-4 py-2 text-xs font-medium text-zinc-400 hover:text-zinc-200">Календарь занятости</button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="p-6 space-y-6">
+        
+        <!-- Tab 1: About & Payment Notes -->
+        <div id="modal-tab-about" class="space-y-4">
+          <div>
+            <h4 class="text-xs uppercase tracking-wider font-semibold text-zinc-400 mb-1">Биография</h4>
+            <p id="modal-bio" class="text-xs text-zinc-300 leading-relaxed"></p>
+          </div>
+          <div class="bg-zinc-950 p-4 rounded-2xl border border-zinc-800 space-y-2">
+            <h4 class="text-xs uppercase tracking-wider font-semibold text-cyan-400 flex items-center gap-1.5">
+              <i data-lucide="wallet" class="w-4 h-4"></i> Условия оплаты и фин. примечания
+            </h4>
+            <p id="modal-payment-notes" class="text-xs text-zinc-400"></p>
+          </div>
+        </div>
+
+        <!-- Tab 2: Media (Embedded YouTube / Vimeo + Gallery) -->
+        <div id="modal-tab-media" class="hidden space-y-5">
+          <div>
+            <h4 class="text-xs uppercase tracking-wider font-semibold text-zinc-400 mb-2 flex items-center gap-1.5">
+              <i data-lucide="play-circle" class="w-4 h-4 text-cyan-400"></i> Шоурил (Showreel)
+            </h4>
+            <div class="aspect-video w-full rounded-2xl overflow-hidden bg-black border border-zinc-800 shadow-xl">
+              <iframe id="modal-showreel-iframe" class="w-full h-full" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-xs uppercase tracking-wider font-semibold text-zinc-400 mb-2">Галерея работ и схемы</h4>
+            <div id="modal-gallery-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Skills & Equipment Tags -->
+        <div id="modal-tab-skills" class="hidden space-y-5">
+          <div>
+            <h4 class="text-xs uppercase tracking-wider font-semibold text-zinc-400 mb-2">Профильное оборудование и теги</h4>
+            <div id="modal-equipment-tags" class="flex flex-wrap gap-2">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4 text-xs">
+            <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+              <span class="text-zinc-400 block text-[10px] uppercase">Образование</span>
+              <strong id="modal-education" class="text-white text-xs mt-1 block"></strong>
+            </div>
+            <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+              <span class="text-zinc-400 block text-[10px] uppercase">Реализованных проектов</span>
+              <strong id="modal-projects-count" class="text-cyan-400 text-base font-mono font-bold mt-1 block"></strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Interactive Availability Calendar -->
+        <div id="modal-tab-calendar" class="hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs uppercase tracking-wider font-semibold text-zinc-400 flex items-center gap-1.5">
+              <i data-lucide="calendar-days" class="w-4 h-4 text-cyan-400"></i> График занятости (Август 2026)
+            </h4>
+            <div class="flex items-center gap-3 text-[11px]">
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Свободен</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Занят</span>
+            </div>
+          </div>
+
+          <div id="modal-calendar-grid" class="grid grid-cols-7 gap-1.5 text-center font-mono text-xs">
+            <!-- Rendered Calendar Days via JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer CTA -->
+      <div class="p-6 bg-zinc-950 border-t border-zinc-800 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] uppercase tracking-wider text-zinc-400">Ставка за смену</span>
+          <div id="modal-footer-rate" class="text-lg font-extrabold text-white font-mono"></div>
+        </div>
+        <button onclick="bookingRequestAction()" class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-zinc-950 font-extrabold text-xs rounded-xl shadow-lg shadow-cyan-950/50 transition-all flex items-center gap-2">
+          <i data-lucide="send" class="w-4 h-4"></i> Забронировать специалиста
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CUSTOM SUBCATEGORY MODAL (Section 5 TZ) -->
+  <div id="custom-cat-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
+      <button onclick="closeCustomCategoryModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div>
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-5 h-5 text-emerald-400"></i> Добавить свою специальность
+        </h3>
+        <p class="text-xs text-zinc-400 mt-1">Не нашли нужную профессию в списке? Отправьте заявку на модерацию администратору.</p>
+      </div>
+
+      <form onsubmit="submitCustomCategory(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-zinc-300 mb-1">Выберите цех</label>
+          <select id="custom-dept-select" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+            <!-- Department Options -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-zinc-300 mb-1">Название специальности</label>
+          <input type="text" id="custom-name-input" required placeholder="Например: Оператор оптического трекинга" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500">
+        </div>
+
+        <div class="pt-2 flex justify-end gap-3">
+          <button type="button" onclick="closeCustomCategoryModal()" class="px-4 py-2 rounded-xl border border-zinc-800 text-xs font-medium text-zinc-400 hover:text-white">Отмена</button>
+          <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-zinc-950 font-bold text-xs rounded-xl shadow-lg shadow-emerald-950/40">Отправить в профиль</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-zinc-900 border border-emerald-500/40 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs">
+    <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+    <span id="toast-message">Заявка успешно отправлена!</span>
+  </div>
+
+  <!-- Main JavaScript App Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

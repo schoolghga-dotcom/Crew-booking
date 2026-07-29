@@ -1,0 +1,143 @@
+[
+  {
+    "id": "spec-1",
+    "name": "Александр Волков",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "2. Цех Света (Светотехника)",
+    "subcategories": ["Художник по свету (Lighting Designer)", "Оператор светового пульта"],
+    "city": "Москва",
+    "shiftRate": 45000,
+    "isOpenToCreative": true,
+    "yearsOfExperience": 8,
+    "projectsCount": 64,
+    "education": "СПбГИК (Светорежиссура, 2016)",
+    "rating": 4.9,
+    "reviewsCount": 28,
+    "equipmentTags": ["grandMA2", "grandMA3", "Avolites Titan", "Blackout", "Capture 2023"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "Светодизайнер со стажем работы на стадионных шоу, съёмках музыкальных клипов и кино. В совершенстве владею пультами grandMA2/3, симуляцией в Capture.",
+    "paymentNotes": "Оплата ИП / Самозанятый. Предоплата 30% на предвизе.",
+    "busyDates": ["2026-08-01", "2026-08-02", "2026-08-05", "2026-08-15", "2026-08-16"]
+  },
+  {
+    "id": "spec-2",
+    "name": "Михаил Соколов",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "1. Операторский цех и Камера",
+    "subcategories": ["Оператор-постановщик (DOP)", "Стедикамист"],
+    "city": "Санкт-Петербург",
+    "shiftRate": 60000,
+    "isOpenToCreative": false,
+    "yearsOfExperience": 11,
+    "projectsCount": 92,
+    "education": "ВГИК (Операторский факультет, 2015)",
+    "rating": 5.0,
+    "reviewsCount": 42,
+    "equipmentTags": ["ARRI Alexa Mini", "RED V-Raptor", "Steadicam Zephyr", "Cooke Anamorphic", "SmallRig"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1579632652768-6cb9dcf85912?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "Кинооператор и стедикамист. Работаю с крупными брендами (Реклама), полнометражными фильмами и клипами.",
+    "paymentNotes": "Работаю по договору ООО/ИП. В командировки выезжаю с собственным комплектом калибровки.",
+    "busyDates": ["2026-08-03", "2026-08-04", "2026-08-10", "2026-08-11", "2026-08-12"]
+  },
+  {
+    "id": "spec-3",
+    "name": "Елена Морозова",
+    "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "3. Цех Звука",
+    "subcategories": ["Звукорежиссер FOH (Front of House)", "Системный инженер (Звук)"],
+    "city": "Москва",
+    "shiftRate": 35000,
+    "isOpenToCreative": true,
+    "yearsOfExperience": 6,
+    "projectsCount": 48,
+    "education": "МГК им. Чайковского (Музыкальная акустика, 2018)",
+    "rating": 4.8,
+    "reviewsCount": 19,
+    "equipmentTags": ["Midas M32", "Behringer SD8", "Sennheiser EW-DX", "RF-Explorer", "Dante Controller"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "FOH-звукорежиссер и радиочастотный менеджер. Настройка Dante-сетей, работы с радиосистемами любой плотности на площадке.",
+    "paymentNotes": "Наличный / Безналичный расчет. Готова к интересным TFP фестивалям.",
+    "busyDates": ["2026-08-08", "2026-08-09", "2026-08-20"]
+  },
+  {
+    "id": "spec-4",
+    "name": "Дмитрий Чернов",
+    "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "1. Операторский цех и Камера",
+    "subcategories": ["Фокус-пуллер (1st AC)", "DIT (Digital Imaging Technician)"],
+    "city": "Москва",
+    "shiftRate": 25000,
+    "isOpenToCreative": true,
+    "yearsOfExperience": 4,
+    "projectsCount": 35,
+    "education": "School of Visual Arts (2020)",
+    "rating": 4.9,
+    "reviewsCount": 15,
+    "equipmentTags": ["Tilta Nucleus-M", "Teradek Bolt 4K", "Accsoon CineView", "SmallRig", "Silverstack DIT"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "Первоклассный 1st AC (Фокус-пуллер) и DIT-инженер. Высокая точность фокуса на светосильной оптике на открытой диафрагме.",
+    "paymentNotes": "Самозанятый.",
+    "busyDates": ["2026-08-01", "2026-08-07", "2026-08-14"]
+  },
+  {
+    "id": "spec-5",
+    "name": "Виктория Белова",
+    "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "7. Костюм и Грим",
+    "subcategories": ["Художник по гриму / Главный гример", "Мастер по спецэффектам (SFX Makeup)"],
+    "city": "Казань",
+    "shiftRate": 30000,
+    "isOpenToCreative": true,
+    "yearsOfExperience": 7,
+    "projectsCount": 51,
+    "education": "Mosmake (SFX Course, 2017)",
+    "rating": 5.0,
+    "reviewsCount": 31,
+    "equipmentTags": ["SFX Prosthetics", "Airbrush Temptu", "Silicone Molding", "Stage Blood FX"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "Пластический грим любой сложности, раны, старение, создание оригинальных образов для хорроров и исторического кино.",
+    "paymentNotes": "Оплата за смену + расходные материалы по чекам.",
+    "busyDates": ["2026-08-06", "2026-08-18", "2026-08-19"]
+  },
+  {
+    "id": "spec-6",
+    "name": "Игорь Ковалев",
+    "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=300&q=80",
+    "primaryDepartment": "8. Сценический комплекс и Механика (Грип / Риггинг)",
+    "subcategories": ["Кей-грип (Key Grip)", "Риггер (Высотные работы / Подвесы)"],
+    "city": "Москва",
+    "shiftRate": 40000,
+    "isOpenToCreative": false,
+    "yearsOfExperience": 10,
+    "projectsCount": 110,
+    "education": "Промышленный альпинизм (Сертификат IRATA Level 2)",
+    "rating": 4.9,
+    "reviewsCount": 39,
+    "equipmentTags": ["Prolyte Truss", "CM Lodestar Hoist", "Rigging Hardware", "Safety Gear"],
+    "showreelUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "gallery": [
+      "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80"
+    ],
+    "bio": "Безопасный и быстрый подвес световых и звуковых ферм, экранов на стадионах и кинопавильонах.",
+    "paymentNotes": "ИП / Безнал с НДС.",
+    "busyDates": ["2026-08-02", "2026-08-13", "2026-08-14", "2026-08-22"]
+  }
+]
